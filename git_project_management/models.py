@@ -8,9 +8,6 @@ import ciso8601
 import pony.orm
 import requests
 
-gitea_token = '136035a957c3587045fc1ea3bb6ea1f87a2270ed'
-github_token = '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'
-
 
 pony_db = pony.orm.Database()
 
