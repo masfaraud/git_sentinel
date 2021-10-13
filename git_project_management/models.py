@@ -4,10 +4,12 @@
 """
 
 """
+import datetime
 import ciso8601
 import pony.orm
 import requests
 
+import matplotlib.pyplot as plt
 
 pony_db = pony.orm.Database()
 
@@ -31,8 +33,9 @@ class GiteaPlatform(GitPlatform):
     def get_repos(self):
         req = requests.get('{}/user/repos'.format(self.api_url),
                            params={'access_token': self.token})
-        # print(req.text, req.url)
         for req_issue in req.json():
+            print(req_issue['name'])
+            
             # print('req_issue', req_issue)
             owner_name = req_issue['owner']['username']
             repo = GiteaRepository.get(platform=self,
@@ -57,6 +60,42 @@ class Repository(pony_db.Entity):
     name = pony.orm.Required(str, 255)
     issues = pony.orm.Set('Issue')
     active = pony.orm.Required(bool, default=False)
+    pull_requests = pony.orm.Set('PullRequest')
+
+    def __str__(self):
+        return self.owner + '.' + self.name
+
+    @pony.orm.db_session()
+    def plot_issues(self, weeks=10):
+        labels = []
+        open_issues = []
+        new_issues = []
+        closed_issues = []
+        now = datetime.datetime.now()
+        for iw in range(weeks):
+            week_start = (now - datetime.timedelta(weeks=iw+1)).timestamp()
+            week_end = (now - datetime.timedelta(weeks=iw)).timestamp()
+            open_issues_week = self.issues.select(lambda i:i.created_at<week_end and i.closed_at>week_end)
+            new_issues_week = self.issues.select(lambda i:i.created_at>week_start and i.created_at<week_end)
+            closed_issues_week = self.issues.select(lambda i:i.closed_at<week_end and i.closed_at>week_start)
+            
+            open_issues.append(open_issues_week.count())
+            new_issues.append(new_issues_week.count())
+            closed_issues.append(closed_issues_week.count())
+            labels.append((now - datetime.timedelta(weeks=iw+1)).strftime('W%U %Y'))
+            
+        fig, ax = plt.subplots()
+
+        r_labels = labels[::-1]
+        r_closed_issues = closed_issues[::-1]
+        r_new_issues = new_issues[::-1]
+
+        ax.bar(r_labels, r_closed_issues, label='closed', color='r', align='edge')
+        ax.bar(r_labels, r_new_issues, bottom=r_closed_issues,
+               label='new', color='g', align='edge')
+        # print(str(self))
+        ax.set_title(str(self))
+        ax.legend()
 
 class GiteaRepository(Repository):
     platform = pony.orm.Required(GiteaPlatform)
@@ -89,6 +128,9 @@ class GiteaRepository(Repository):
                 issue.title = req_issue['title']
                 issue.body = req_issue['body']
                 issue.closed = closed
+
+            if req_issue['closed_at']:
+                issue.closed_at = int(ciso8601.parse_datetime(req_issue['closed_at']).timestamp())
 
     @pony.orm.db_session()
     def get_pull_requests(self):
@@ -128,6 +170,25 @@ class Issue(pony_db.Entity):
     closed = pony.orm.Required(bool, default=False)
     created_at = pony.orm.Required(int)
     updated_at = pony.orm.Required(int)
+    closed_at = pony.orm.Optional(int)
+    
+    
+class PullRequest(pony_db.Entity):
+    number = pony.orm.Required(int)
+    repository = pony.orm.Required(Repository)
+    # title = pony.orm.Required(str, 255)
+    body = pony.orm.Optional(str, 50000)
+    api_url = pony.orm.Required(str, 255)
+    html_url = pony.orm.Required(str, 255)
+    merged = pony.orm.Required(bool, default=False)
+    mergeable = pony.orm.Required(bool, default=False)
+    created_at = pony.orm.Required(int)
+    merged_at = pony.orm.Optional(int)
+        
+# class Milestone(pony_db.Entity):
+    
+#     issues = pony.orm.Set(Issue)
+    
     
 class ProjectManager:
     def __init__(self, db_host, db_port, db_user, db_name, db_password):
@@ -149,6 +210,11 @@ class ProjectManager:
     @pony.orm.db_session()
     def get_platforms(self):
         return list(GitPlatform.select())
+
+
+    @pony.orm.db_session()
+    def active_repositories(self):
+        return list(Repository.select(lambda r:r.active))    
     
     @pony.orm.db_session()
     def update(self):
@@ -161,26 +227,33 @@ class ProjectManager:
             repo.get_issues()
     
     @pony.orm.db_session()
-    def plot_issues(self, months=12):
-        # start_ts = time.time() - 12*31*24*3600
-        for issue in Issue.select():
-            # print(issue.closed)
-            print(issue.title)
+    def plot_issues(self, weeks=12):
+        labels = []
+        open_issues = []
+        new_issues = []
+        closed_issues = []
+        now = datetime.datetime.now()
+        for i in range(weeks):
+            week_start = (now - datetime.timedelta(weeks=i+1)).timestamp()
+            week_end = (now - datetime.timedelta(weeks=i)).timestamp()
+            open_issues_week = Issue.select(lambda i:i.created_at<week_end and i.closed_at>week_end)
+            new_issues_week = Issue.select(lambda i:i.created_at>week_start and i.created_at<week_end)
+            closed_issues_week = Issue.select(lambda i:i.closed_at<week_end and i.closed_at>week_start)
+            
+            open_issues.append(open_issues_week.count())
+            new_issues.append(new_issues_week.count())
+            closed_issues.append(closed_issues_week.count())
+            labels.append((now - datetime.timedelta(weeks=i+1)).strftime('W%U %Y'))
+            
+        fig, ax = plt.subplots()
+
+        r_labels = labels[::-1]
+        r_closed_issues = closed_issues[::-1]
+        r_new_issues = new_issues[::-1]
+
+        ax.bar(r_labels, r_closed_issues, label='closed', color='r', align='edge')
+        ax.bar(r_labels, r_new_issues, bottom=r_closed_issues,
+               label='new', color='g', align='edge')
         
+        ax.legend()
        
-class PullRequest(pony_db.Entity):
-    number = pony.orm.Required(int)
-    repository = pony.orm.Required(Repository)
-    # title = pony.orm.Required(str, 255)
-    body = pony.orm.Optional(str, 50000)
-    api_url = pony.orm.Required(str, 255)
-    html_url = pony.orm.Required(str, 255)
-    merged = pony.orm.Required(bool, default=False)
-    mergeable = pony.orm.Required(bool, default=False)
-    created_at = pony.orm.Required(int)
-    merged_at = pony.orm.Optional(int)
-        
-# class Milestone(pony_db.Entity):
-    
-#     issues = pony.orm.Set(Issue)
-    
