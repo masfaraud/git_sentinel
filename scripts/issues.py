@@ -28,3 +28,5 @@ with pony.orm.db_session:
     for repo in project_manager.active_repositories():
         # print(repo.title)
         repo.plot_issues()
+        repo.plot_milestones()
+        

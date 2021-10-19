@@ -66,6 +66,14 @@ class Repository(pony_db.Entity):
     def __str__(self):
         return self.owner + '.' + self.name
 
+    def plot_milestones(self):
+        for milestone in self.milestones.select(lambda m:not m.closed_at).order_by(Milestone.due_on):
+            print(milestone.title)
+            print(milestone.due_on, milestone.closed_at)
+            closed_issues = milestone.issues.select(lambda i:i.closed).count()
+            open_issues = milestone.issues.select(lambda i:not i.closed).count()
+            print('progress ', closed_issues/(closed_issues + open_issues)*100, '%')
+
     @pony.orm.db_session()
     def plot_issues(self, weeks=15):
         fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
