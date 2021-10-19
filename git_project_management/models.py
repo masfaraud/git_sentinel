@@ -8,7 +8,7 @@ import datetime
 import ciso8601
 import pony.orm
 import requests
-
+import statistics
 import matplotlib.pyplot as plt
 
 pony_db = pony.orm.Database()
@@ -76,11 +76,12 @@ class Repository(pony_db.Entity):
 
     @pony.orm.db_session()
     def plot_issues(self, weeks=15):
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharex=True)
 
         ax1.grid()
         ax2.grid()
         ax3.grid()
+        ax4.grid()
 
 
         labels = []
@@ -88,7 +89,9 @@ class Repository(pony_db.Entity):
         new_issues = []
         closed_issues = []
         no_milestone_issues = []
-        
+        mean_closing_time = []
+        max_closing_time = []
+
         now = datetime.datetime.now()
         for iw in range(weeks):
             week_start = (now - datetime.timedelta(weeks=iw+1)).timestamp()
@@ -98,11 +101,27 @@ class Repository(pony_db.Entity):
             new_issues_week = self.issues.select(lambda i:i.created_at>week_start and i.created_at<week_end)
             closed_issues_week = self.issues.select(lambda i:i.closed_at<week_end and i.closed_at>week_start)
             
+            number_closed_issues_week = closed_issues_week.count()
+            close_times = [(i.closed_at - i.created_at)/3600/24 for i in closed_issues_week]
+            # print(close_times)
+            if number_closed_issues_week:
+                
+                mean_closing_time_week = statistics.mean(close_times)
+                max_closing_time_week = max(close_times)
+                # print(mean_closing_time_week, std_closing_time_week)
+            else:
+                mean_closing_time_week = 0.
+                max_closing_time_week = 0.
+                
+            mean_closing_time.append(mean_closing_time_week)
+            max_closing_time.append(max_closing_time_week)
+            
+            
             no_milestone_issues_week = [i for i in open_issues_week if not i.milestone]
             
             open_issues.append(open_issues_week.count())
             new_issues.append(new_issues_week.count())
-            closed_issues.append(closed_issues_week.count())
+            closed_issues.append(number_closed_issues_week)
             no_milestone_issues.append(len(no_milestone_issues_week))
             labels.append((now - datetime.timedelta(weeks=iw+1)).strftime('W%U %Y'))
             
@@ -113,6 +132,8 @@ class Repository(pony_db.Entity):
         r_new_issues = new_issues[::-1]
         r_open_issues = open_issues[::-1]
         r_no_milestone_issues = no_milestone_issues[::-1]
+        r_max_closing_time = max_closing_time[::-1]
+        r_mean_closing_time = mean_closing_time[::-1]
 
         ax1.bar(r_labels, r_closed_issues, label='closed in the week', color='r', align='edge')
         ax1.bar(r_labels, r_new_issues, bottom=r_closed_issues,
@@ -126,7 +147,12 @@ class Repository(pony_db.Entity):
         ax3.bar(r_labels, r_no_milestone_issues, label='No milestones issues', color='y', align='edge')
         ax3.legend()
         
-    
+        ax4.bar(r_labels, r_max_closing_time,
+               label='Max closing time (days)', color='r', align='edge')
+        ax4.bar(r_labels, r_mean_closing_time, color='b', label='Mean closing time (days)', align='edge')
+
+        ax4.legend()
+        
         ax1.set_title(str(self))
 
 class GiteaRepository(Repository):
