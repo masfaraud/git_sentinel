@@ -15,7 +15,7 @@ project_manager = gpm_models.ProjectManager(conf.db_host, conf.db_port,
 with pony.orm.db_session:
     
     # project_manager.update()
-    project_manager.plot_issues()
+    # project_manager.plot_issues()
     # for platform in project_manager.get_platforms():
     #     for repo in platform.repositories:
     #         if repo.owner == 'DessiA' and not repo.active:

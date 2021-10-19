@@ -61,21 +61,26 @@ class Repository(pony_db.Entity):
     issues = pony.orm.Set('Issue')
     active = pony.orm.Required(bool, default=False)
     pull_requests = pony.orm.Set('PullRequest')
+    milestones = pony.orm.Set('Milestone')
 
     def __str__(self):
         return self.owner + '.' + self.name
 
     @pony.orm.db_session()
-    def plot_issues(self, weeks=10):
+    def plot_issues(self, weeks=15):
+        fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+
         labels = []
         open_issues = []
         new_issues = []
         closed_issues = []
+        
         now = datetime.datetime.now()
         for iw in range(weeks):
             week_start = (now - datetime.timedelta(weeks=iw+1)).timestamp()
             week_end = (now - datetime.timedelta(weeks=iw)).timestamp()
-            open_issues_week = self.issues.select(lambda i:i.created_at<week_end and i.closed_at>week_end)
+            
+            open_issues_week = self.issues.select(lambda i:i.created_at<week_end and (not i.closed or i.closed_at>week_end))
             new_issues_week = self.issues.select(lambda i:i.created_at>week_start and i.created_at<week_end)
             closed_issues_week = self.issues.select(lambda i:i.closed_at<week_end and i.closed_at>week_start)
             
@@ -84,18 +89,23 @@ class Repository(pony_db.Entity):
             closed_issues.append(closed_issues_week.count())
             labels.append((now - datetime.timedelta(weeks=iw+1)).strftime('W%U %Y'))
             
-        fig, ax = plt.subplots()
 
         r_labels = labels[::-1]
+        
         r_closed_issues = closed_issues[::-1]
         r_new_issues = new_issues[::-1]
+        r_open_issues = open_issues[::-1]
 
-        ax.bar(r_labels, r_closed_issues, label='closed', color='r', align='edge')
-        ax.bar(r_labels, r_new_issues, bottom=r_closed_issues,
-               label='new', color='g', align='edge')
+        ax1.bar(r_labels, r_closed_issues, label='closed in the week', color='r', align='edge')
+        ax1.bar(r_labels, r_new_issues, bottom=r_closed_issues,
+               label='new in the week', color='g', align='edge')
         # print(str(self))
-        ax.set_title(str(self))
-        ax.legend()
+        ax1.legend()
+
+        ax2.bar(r_labels, r_open_issues, label='Open issues', color='g', align='edge')
+        ax2.legend()
+
+        ax1.set_title(str(self))
 
 class GiteaRepository(Repository):
     platform = pony.orm.Required(GiteaPlatform)
@@ -103,34 +113,61 @@ class GiteaRepository(Repository):
     
     @pony.orm.db_session()
     def get_issues(self):
-        req = requests.get('{}/repos/{}/{}/issues'.format(self.platform.api_url, self.owner, self.name),
-                           params={'state':'all',
-                                   'access_token': self.platform.token})
-        for req_issue in req.json():
-            issue = Issue.get(repository=self,
-                              number=req_issue['number'])
-            created_at = int(ciso8601.parse_datetime(req_issue['created_at']).timestamp())
-            updated_at = int(ciso8601.parse_datetime(req_issue['updated_at']).timestamp())
-            closed = req_issue['state']=='closed'
-            
-            if not issue:
-                issue = Issue(number=req_issue['number'],
-                              repository=self,
-                              title=req_issue['title'],
-                              body=req_issue['body'],
-                              api_url=req_issue['url'],
-                              html_url=req_issue['html_url'],
-                              closed=closed,
-                              created_at=created_at,
-                              updated_at=updated_at
-                              )
-            else:
-                issue.title = req_issue['title']
-                issue.body = req_issue['body']
-                issue.closed = closed
+        page_number_issues = 1
+        page_number = 1
+        while page_number_issues:
+            print('page', page_number)
+            req = requests.get('{}/repos/{}/{}/issues'.format(self.platform.api_url, self.owner, self.name),
+                               params={'state':'all',
+                                       'page': page_number,
+                                       'access_token': self.platform.token})
+            for req_issue in req.json():
+                issue = Issue.get(repository=self,
+                                  number=req_issue['number'])
+                created_at = int(ciso8601.parse_datetime(req_issue['created_at']).timestamp())
+                updated_at = int(ciso8601.parse_datetime(req_issue['updated_at']).timestamp())
+                closed = req_issue['state']=='closed'
+                
+                if not issue:
+                    issue = Issue(number=req_issue['number'],
+                                  repository=self,
+                                  title=req_issue['title'],
+                                  body=req_issue['body'],
+                                  api_url=req_issue['url'],
+                                  html_url=req_issue['html_url'],
+                                  closed=closed,
+                                  created_at=created_at,
+                                  updated_at=updated_at
+                                  )
+                else:
+                    issue.title = req_issue['title']
+                    issue.body = req_issue['body']
+                    issue.closed = closed
+    
+                if req_issue['milestone']:
+                    print(req_issue['milestone'])
+                    milestone = Milestone.get(platform_id=req_issue['milestone']['id'])
+                    if not milestone:
 
-            if req_issue['closed_at']:
-                issue.closed_at = int(ciso8601.parse_datetime(req_issue['closed_at']).timestamp())
+
+                        milestone = Milestone(platform_id=req_issue['milestone']['id'],
+                                              repository = self,
+                                              title = req_issue['milestone']['title'])
+                                              
+                    if 'due_on' in req_issue['milestone'] and req_issue['milestone']['due_on']:
+                        milestone.due_on = int(ciso8601.parse_datetime(req_issue['milestone']['due_on']).timestamp())
+                        
+                    if req_issue['milestone']['closed_at']:
+                        milestone.closed_at = int(ciso8601.parse_datetime(req_issue['milestone']['closed_at']).timestamp())
+                        
+                    if not issue in milestone.issues:
+                        milestone.issues.add(issue)
+    
+                if req_issue['closed_at']:
+                    issue.closed_at = int(ciso8601.parse_datetime(req_issue['closed_at']).timestamp())
+    
+            page_number_issues = len(req.json())
+            page_number += 1
 
     @pony.orm.db_session()
     def get_pull_requests(self):
@@ -141,24 +178,30 @@ class GiteaRepository(Repository):
             pull_request = PullRequest.get(repository=self,
                                            number=req_pr['number'])
             created_at = int(ciso8601.parse_datetime(req_pr['created_at']).timestamp())
-            merged_at = int(ciso8601.parse_datetime(req_pr['merged_at']).timestamp())
+            updated_at = int(ciso8601.parse_datetime(req_pr['updated_at']).timestamp())
             merged = req_pr['merged']=='true'
             
-            # if not pull_request:
-            #     issue = Issue(number=req_issue['number'],
-            #                   repository=self,
-            #                   title=req_issue['title'],
-            #                   body=req_issue['body'],
-            #                   api_url=req_issue['url'],
-            #                   html_url=req_issue['html_url'],
-            #                   closed=closed,
-            #                   created_at=created_at,
-            #                   updated_at=updated_at
-            #                   )
-            # else:
-            #     issue.title = req_issue['title']
-            #     issue.body = req_issue['body']
-            #     issue.closed = closed      
+            
+            if not pull_request:
+                pull_request = PullRequest(number=req_pr['number'],
+                                           repository=self,
+                                           title=req_pr['title'],
+                                           body=req_pr['body'],
+                                           api_url=req_pr['url'],
+                                           html_url=req_pr['html_url'],
+                                           merged=merged,
+                                           created_at=created_at,
+                                           updated_at=updated_at,
+                                           base_branch=req_pr['base']['label'],
+                                           head_branch=req_pr['head']['label'],
+                                    )
+            else:
+                pull_request.title = req_pr['title']
+                pull_request.body = req_pr['body']
+                pull_request.merged = merged      
+    
+            if req_pr['merged_at']:
+                pull_request.merged_at = int(ciso8601.parse_datetime(req_pr['merged_at']).timestamp())
     
 class Issue(pony_db.Entity):
     number = pony.orm.Required(int)
@@ -171,12 +214,14 @@ class Issue(pony_db.Entity):
     created_at = pony.orm.Required(int)
     updated_at = pony.orm.Required(int)
     closed_at = pony.orm.Optional(int)
-    
+    milestone = pony.orm.Optional('Milestone')
     
 class PullRequest(pony_db.Entity):
     number = pony.orm.Required(int)
     repository = pony.orm.Required(Repository)
-    # title = pony.orm.Required(str, 255)
+    title = pony.orm.Required(str, 255)
+    base_branch = pony.orm.Required(str, 255)
+    head_branch = pony.orm.Required(str, 255)
     body = pony.orm.Optional(str, 50000)
     api_url = pony.orm.Required(str, 255)
     html_url = pony.orm.Required(str, 255)
@@ -184,10 +229,16 @@ class PullRequest(pony_db.Entity):
     mergeable = pony.orm.Required(bool, default=False)
     created_at = pony.orm.Required(int)
     merged_at = pony.orm.Optional(int)
-        
-# class Milestone(pony_db.Entity):
+    updated_at = pony.orm.Required(int)
     
-#     issues = pony.orm.Set(Issue)
+class Milestone(pony_db.Entity):
+    platform_id = pony.orm.Required(int)
+    closed_at = pony.orm.Optional(int)
+    repository = pony.orm.Required(Repository)
+    title = pony.orm.Required(str, 255)
+    issues = pony.orm.Set(Issue)
+    due_on = pony.orm.Optional(int)
+
     
     
 class ProjectManager:
@@ -218,42 +269,20 @@ class ProjectManager:
     
     @pony.orm.db_session()
     def update(self):
-        print('global update')
+        # print('global update')
         for platform in GitPlatform.select():
-            print('platform', platform)
+            # print('platform', platform)
             platform.get_repos()
         for repo in Repository.select(lambda r:r.active):
             # print(repo)
             repo.get_issues()
+            repo.get_pull_requests()
     
-    @pony.orm.db_session()
-    def plot_issues(self, weeks=12):
-        labels = []
-        open_issues = []
-        new_issues = []
-        closed_issues = []
-        now = datetime.datetime.now()
-        for i in range(weeks):
-            week_start = (now - datetime.timedelta(weeks=i+1)).timestamp()
-            week_end = (now - datetime.timedelta(weeks=i)).timestamp()
-            open_issues_week = Issue.select(lambda i:i.created_at<week_end and i.closed_at>week_end)
-            new_issues_week = Issue.select(lambda i:i.created_at>week_start and i.created_at<week_end)
-            closed_issues_week = Issue.select(lambda i:i.closed_at<week_end and i.closed_at>week_start)
-            
-            open_issues.append(open_issues_week.count())
-            new_issues.append(new_issues_week.count())
-            closed_issues.append(closed_issues_week.count())
-            labels.append((now - datetime.timedelta(weeks=i+1)).strftime('W%U %Y'))
-            
-        fig, ax = plt.subplots()
-
-        r_labels = labels[::-1]
-        r_closed_issues = closed_issues[::-1]
-        r_new_issues = new_issues[::-1]
-
-        ax.bar(r_labels, r_closed_issues, label='closed', color='r', align='edge')
-        ax.bar(r_labels, r_new_issues, bottom=r_closed_issues,
-               label='new', color='g', align='edge')
-        
-        ax.legend()
+    # @property
+    # def issues(self):
+    #     return Issue.select(lambda i:True)
+    
+    # @pony.orm.db_session()
+    # def plot_issues(self, weeks=12):
+    #     Repository.plot_issues(self)
        
