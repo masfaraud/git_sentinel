@@ -76,12 +76,18 @@ class Repository(pony_db.Entity):
 
     @pony.orm.db_session()
     def plot_issues(self, weeks=15):
-        fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
+
+        ax1.grid()
+        ax2.grid()
+        ax3.grid()
+
 
         labels = []
         open_issues = []
         new_issues = []
         closed_issues = []
+        no_milestone_issues = []
         
         now = datetime.datetime.now()
         for iw in range(weeks):
@@ -92,9 +98,12 @@ class Repository(pony_db.Entity):
             new_issues_week = self.issues.select(lambda i:i.created_at>week_start and i.created_at<week_end)
             closed_issues_week = self.issues.select(lambda i:i.closed_at<week_end and i.closed_at>week_start)
             
+            no_milestone_issues_week = [i for i in open_issues_week if not i.milestone]
+            
             open_issues.append(open_issues_week.count())
             new_issues.append(new_issues_week.count())
             closed_issues.append(closed_issues_week.count())
+            no_milestone_issues.append(len(no_milestone_issues_week))
             labels.append((now - datetime.timedelta(weeks=iw+1)).strftime('W%U %Y'))
             
 
@@ -103,6 +112,7 @@ class Repository(pony_db.Entity):
         r_closed_issues = closed_issues[::-1]
         r_new_issues = new_issues[::-1]
         r_open_issues = open_issues[::-1]
+        r_no_milestone_issues = no_milestone_issues[::-1]
 
         ax1.bar(r_labels, r_closed_issues, label='closed in the week', color='r', align='edge')
         ax1.bar(r_labels, r_new_issues, bottom=r_closed_issues,
@@ -112,7 +122,11 @@ class Repository(pony_db.Entity):
 
         ax2.bar(r_labels, r_open_issues, label='Open issues', color='g', align='edge')
         ax2.legend()
-
+        
+        ax3.bar(r_labels, r_no_milestone_issues, label='No milestones issues', color='y', align='edge')
+        ax3.legend()
+        
+    
         ax1.set_title(str(self))
 
 class GiteaRepository(Repository):
