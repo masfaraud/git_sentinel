@@ -14,7 +14,7 @@ project_manager = gpm_models.ProjectManager(conf.db_host, conf.db_port,
                                      conf.db_user, conf.db_name, conf.db_password)
 with pony.orm.db_session:
     
-    # project_manager.update()
+    project_manager.update()
     # project_manager.plot_issues()
     # for platform in project_manager.get_platforms():
     #     for repo in platform.repositories:
@@ -29,4 +29,7 @@ with pony.orm.db_session:
         # print(repo.title)
         repo.plot_issues()
         repo.plot_milestones()
+        
+    for pr in gpm_models.PullRequest.mergeable_pull_requests():
+        print(pr.repository.name, pr.title, pr.mergeable)
         

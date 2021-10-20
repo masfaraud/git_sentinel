@@ -4,12 +4,15 @@
 """
 
 """
+import time
 import datetime
 import ciso8601
 import pony.orm
 import requests
 import statistics
 import matplotlib.pyplot as plt
+
+STALL_PR_WARNING_TIME = 2*24*3600
 
 pony_db = pony.orm.Database()
 
@@ -34,9 +37,6 @@ class GiteaPlatform(GitPlatform):
         req = requests.get('{}/user/repos'.format(self.api_url),
                            params={'access_token': self.token})
         for req_issue in req.json():
-            print(req_issue['name'])
-            
-            # print('req_issue', req_issue)
             owner_name = req_issue['owner']['username']
             repo = GiteaRepository.get(platform=self,
                                        name=req_issue['name'],
@@ -74,6 +74,9 @@ class Repository(pony_db.Entity):
             open_issues = milestone.issues.select(lambda i:not i.closed).count()
             print('progress ', closed_issues/(closed_issues + open_issues)*100, '%')
 
+    def stalled_branches(self):
+        pass
+
     @pony.orm.db_session()
     def plot_issues(self, weeks=15):
         fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharex=True)
@@ -91,6 +94,7 @@ class Repository(pony_db.Entity):
         no_milestone_issues = []
         mean_closing_time = []
         max_closing_time = []
+        # std_closing_time_week = []
 
         now = datetime.datetime.now()
         for iw in range(weeks):
@@ -164,7 +168,7 @@ class GiteaRepository(Repository):
         page_number_issues = 1
         page_number = 1
         while page_number_issues:
-            print('page', page_number)
+            # print('page', page_number)
             req = requests.get('{}/repos/{}/{}/issues'.format(self.platform.api_url, self.owner, self.name),
                                params={'state':'all',
                                        'page': page_number,
@@ -193,7 +197,7 @@ class GiteaRepository(Repository):
                     issue.closed = closed
     
                 if req_issue['milestone']:
-                    print(req_issue['milestone'])
+                    # print(req_issue['milestone'])
                     milestone = Milestone.get(platform_id=req_issue['milestone']['id'])
                     if not milestone:
 
@@ -227,8 +231,8 @@ class GiteaRepository(Repository):
                                            number=req_pr['number'])
             created_at = int(ciso8601.parse_datetime(req_pr['created_at']).timestamp())
             updated_at = int(ciso8601.parse_datetime(req_pr['updated_at']).timestamp())
-            merged = req_pr['merged']=='true'
-            
+            merged = req_pr['merged']
+            mergeable = req_pr['mergeable']
             
             if not pull_request:
                 pull_request = PullRequest(number=req_pr['number'],
@@ -246,7 +250,8 @@ class GiteaRepository(Repository):
             else:
                 pull_request.title = req_pr['title']
                 pull_request.body = req_pr['body']
-                pull_request.merged = merged      
+                pull_request.merged = merged   
+                pull_request.mergeable = mergeable   
     
             if req_pr['merged_at']:
                 pull_request.merged_at = int(ciso8601.parse_datetime(req_pr['merged_at']).timestamp())
@@ -279,6 +284,14 @@ class PullRequest(pony_db.Entity):
     merged_at = pony.orm.Optional(int)
     updated_at = pony.orm.Required(int)
     
+    @classmethod
+    def mergeable_pull_requests(cls):
+        return cls.select(lambda pr: pr.mergeable and (not pr.merged))
+    
+    @classmethod
+    def stalled_pull_requests(cls):
+        return cls.select(lambda pr: pr.mergeable and (not pr.merged) and pr.updated_at - time.time()>STALL_PR_WARNING_TIME)
+    
 class Milestone(pony_db.Entity):
     platform_id = pony.orm.Required(int)
     closed_at = pony.orm.Optional(int)
@@ -287,7 +300,6 @@ class Milestone(pony_db.Entity):
     issues = pony.orm.Set(Issue)
     due_on = pony.orm.Optional(int)
 
-    
     
 class ProjectManager:
     def __init__(self, db_host, db_port, db_user, db_name, db_password):
