@@ -47,4 +47,8 @@ Project Link: [https://github.com/masfaraud/git_projet_management](https://githu
 
 [contributors-shield]: https://img.shields.io/github/contributors/masfaraud/git_project_management.svg?style=for-the-badge
 [stars-shield]: https://img.shields.io/github/stars/masfaraud/git_project_management.svg
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/masfaraud/git_project_management.svg?style=for-the-badge
+
+[contributors-url]: https://github.com/masfaraud/git_project_management/graphs/contributors
+[stars-url]: https://github.com/masfaraud/git_project_management/stargazers
+[issues-url]: https://github.com/masfaraud/git_project_management/issues
