@@ -2,13 +2,12 @@
 Project management based on your repos and issues
 
 [![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://raw.githubusercontent.com/masfaraud/git_project_management/master/docs/images/stats.png)
+![stats](https://raw.githubusercontent.com/masfaraud/git_project_management/master/docs/images/stats.png)
 
 Git platform like github or gitea offers ticketing and simple project management. In the case of a team working across several repositories on several platforms, it is hard to monitor all the activity.
 This projects aims to merge all data from these repos to offer a dashboard to follow all devs.
@@ -31,7 +30,7 @@ See the script folder
 - API service package in docker compose
 - A web frontend to explore the data
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+See the ![open issues](https://github.com/masfaraud/git_project_management/issues) for a full list of proposed features (and known issues).
 
 ## Contributing
 
@@ -48,3 +47,4 @@ Project Link: [https://github.com/masfaraud/git_projet_management](https://githu
 
 [contributors-shield]: https://img.shields.io/github/contributors/masfaraud/git_project_management.svg?style=for-the-badge
 [stars-shield]: https://img.shields.io/github/stars/masfaraud/git_project_management.svg
+[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
