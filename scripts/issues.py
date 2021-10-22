@@ -14,7 +14,7 @@ project_manager = gpm_models.ProjectManager(conf.db_host, conf.db_port,
                                      conf.db_user, conf.db_name, conf.db_password)
 with pony.orm.db_session:
     
-    project_manager.update()
+    # project_manager.update()
     # project_manager.plot_issues()
     # for platform in project_manager.get_platforms():
     #     for repo in platform.repositories:

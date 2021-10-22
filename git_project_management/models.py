@@ -78,13 +78,22 @@ class Repository(pony_db.Entity):
         pass
 
     @pony.orm.db_session()
+    def issue_types(self):
+        return list(set([i.type for i in self.issues.select(lambda j:len(j.type)>0)]))
+    
+    def issue_priorities(self):
+        return list(set([i.priority for i in self.issues.select(lambda j:len(j.priority)>0)]))
+    
+
+    @pony.orm.db_session()
     def plot_issues(self, weeks=15):
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharex=True)
+        fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, sharex=True)
 
         ax1.grid()
         ax2.grid()
         ax3.grid()
         ax4.grid()
+        ax5.grid()
 
 
         labels = []
@@ -95,6 +104,12 @@ class Repository(pony_db.Entity):
         mean_closing_time = []
         max_closing_time = []
         # std_closing_time_week = []
+
+        issues_by_types = {t: [] for t in self.issue_types()}
+        issues_by_types['uncategorized'] = []
+        
+        issues_by_priority = {p: [] for p in self.issue_priorities()}
+        issues_by_priority['unprioritized'] = []
 
         now = datetime.datetime.now()
         for iw in range(weeks):
@@ -121,6 +136,7 @@ class Repository(pony_db.Entity):
             max_closing_time.append(max_closing_time_week)
             
             
+            
             no_milestone_issues_week = [i for i in open_issues_week if not i.milestone]
             
             open_issues.append(open_issues_week.count())
@@ -129,6 +145,22 @@ class Repository(pony_db.Entity):
             no_milestone_issues.append(len(no_milestone_issues_week))
             labels.append((now - datetime.timedelta(weeks=iw+1)).strftime('W%U %Y'))
             
+            for v in issues_by_types.values():
+                v.append(0)
+            for v in issues_by_priority.values():
+                v.append(0)
+            
+            for issue in open_issues_week:
+                if issue.type:
+                    issues_by_types[issue.type][-1] += 1
+                else:
+                    issues_by_types['uncategorized'][-1] += 1
+                    
+                if issue.priority:
+                    issues_by_priority[issue.priority][-1] += 1
+                else:
+                    issues_by_priority['unprioritized'][-1] += 1
+                
 
         r_labels = labels[::-1]
         
@@ -145,17 +177,31 @@ class Repository(pony_db.Entity):
         # print(str(self))
         ax1.legend()
 
-        ax2.bar(r_labels, r_open_issues, label='Open issues', color='g', align='edge')
+        current_bottom = [0]*len(labels)
+        for type_, issue_number in issues_by_types.items():
+            color = Issue.type_color(type_)
+            ax2.bar(r_labels, issue_number[::-1], bottom=current_bottom,
+                    color=color, label='type: '+type_, align='edge')
+            current_bottom = issue_number[::-1]
         ax2.legend()
-        
-        ax3.bar(r_labels, r_no_milestone_issues, label='No milestones issues', color='y', align='edge')
+
+        current_bottom = [0]*len(labels)
+        for priority, issue_number in issues_by_priority.items():
+            color = Issue.priority_color(priority)
+            ax3.bar(r_labels, issue_number[::-1], bottom=current_bottom,
+                    color=color, label=priority, align='edge')
+            current_bottom = issue_number[::-1]
         ax3.legend()
         
-        ax4.bar(r_labels, r_max_closing_time,
-               label='Max closing time (days)', color='r', align='edge')
-        ax4.bar(r_labels, r_mean_closing_time, color='b', label='Mean closing time (days)', align='edge')
-
+        ax4.bar(r_labels, r_no_milestone_issues, label='No milestones issues',
+                color='y', align='edge')
         ax4.legend()
+        
+        ax5.bar(r_labels, r_max_closing_time,
+               label='Max closing time (days)', color='r', align='edge')
+        ax5.bar(r_labels, r_mean_closing_time, color='b', label='Mean closing time (days)', align='edge')
+
+        ax5.legend()
         
         ax1.set_title(str(self))
 
@@ -195,6 +241,17 @@ class GiteaRepository(Repository):
                     issue.title = req_issue['title']
                     issue.body = req_issue['body']
                     issue.closed = closed
+    
+                if req_issue['labels']:
+                    for label in req_issue['labels']:
+                        for label_prefix in ['priority', 'type']:
+                            full_prefix = label_prefix + ':'
+                            if label['name'].startswith(full_prefix):
+                                value = label['name'].replace(full_prefix, '')
+                                value = value.lstrip(' ').lower()
+                                if value:
+                                    setattr(issue, label_prefix, value)
+
     
                 if req_issue['milestone']:
                     # print(req_issue['milestone'])
@@ -268,6 +325,32 @@ class Issue(pony_db.Entity):
     updated_at = pony.orm.Required(int)
     closed_at = pony.orm.Optional(int)
     milestone = pony.orm.Optional('Milestone')
+    type = pony.orm.Optional(str)
+    priority = pony.orm.Optional(str)
+    
+    @staticmethod
+    def type_color(type_):
+        colors = {'bug': 'r', 'uncategorized': 'grey'}
+        if type_ in colors:
+            return colors[type_]
+        else:
+            return None
+
+    @staticmethod
+    def priority_color(priority):
+        colors = {'critical': 'darkred',
+                  'high': 'r',
+                  'medium': 'y',
+                  'low': 'blue',
+                  'unprioritized': 'grey'}
+        if priority in colors:
+            return colors[priority]
+        else:
+            return None
+    
+    @classmethod
+    def get_all_types(cls):
+        return list(set([i.type for i in cls.select(lambda j:j.type)]))
     
 class PullRequest(pony_db.Entity):
     number = pony.orm.Required(int)
