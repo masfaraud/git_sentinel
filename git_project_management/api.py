@@ -8,8 +8,16 @@ Created on Mon Oct 25 08:39:49 2021
 
 import os
 from flask import Flask, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+app.config['CORS_EXPOSE_HEADERS'] = ['Content-Disposition']
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+# Before inserting config
+cors = CORS(app)
+
 
 # Read from env vars
 for env_var_name in ['DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT']:
