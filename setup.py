@@ -108,6 +108,6 @@ setup(name='git_project_management',
       author='Steven Masfaraud',
       author_email='opensource@masfaraud.fr',
       packages=['git_project_management'],
-      install_requires=['pony', 'ciso8601'],
+      install_requires=['pony', 'ciso8601', 'Flask'],
       python_requires='>=3.7')
 

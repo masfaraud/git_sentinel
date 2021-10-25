@@ -6,3 +6,6 @@ Created on Sun Sep 12 17:37:07 2021
 @author: steven
 """
 
+import pkg_resources
+
+__version__ = pkg_resources.require("git_project_management")[0].version
