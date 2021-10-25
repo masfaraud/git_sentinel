@@ -19,7 +19,6 @@ for env_var_name in ['DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT']:
         raise RuntimeError('Could not load {} from env vars'.format(env_var_name))
 
 import git_project_management.models as gpm_models
-import config as conf
 
 project_manager = gpm_models.ProjectManager(app.config['DB_HOST'],
                                             app.config['DB_PORT'],

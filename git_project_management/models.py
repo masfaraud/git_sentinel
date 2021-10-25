@@ -19,6 +19,11 @@ pony_db = pony.orm.Database()
 class GitPlatform(pony_db.Entity):
     base_url = pony.orm.Required(str, 100, unique=True)
     token = pony.orm.Required(str, 100)
+
+    def to_dict(self):
+        # DO Not put token in dict!!!
+        return {'id': self.id,
+                'base_url': self.base_url}
     
     @property
     def api_url(self):
@@ -83,7 +88,27 @@ class Repository(pony_db.Entity):
     
     def issue_priorities(self):
         return list(set([i.priority for i in self.issues.select(lambda j:len(j.priority)>0)]))
+
+    def stats(self):
+        open_issues = self.issues.select(lambda i:not i.closed)
+        uncat_open_issues = self.issues.select(lambda i:not i.closed and not i.type)
+        unprio_open_issues = self.issues.select(lambda i:not i.closed and not i.priority)
+        no_milestones_open_issues = self.issues.select(lambda i:not i.closed and not i.milestone)
+        
+        return {'number_open_issues': open_issues.count(),
+                'number_uncategorized_open_issues': uncat_open_issues.count(),
+                'number_unprioritized_open_issues': unprio_open_issues.count(),
+                'number_no_milestones_open_issues': no_milestones_open_issues.count()}
     
+    def to_dict(self, stats=False):
+        d = {'name': self.name,
+             'active': self.active,
+             'id': self.id}
+        
+        if stats:
+            d.update(self.stats())
+        
+        return d
 
     @pony.orm.db_session()
     def plot_issues(self, weeks=15):
