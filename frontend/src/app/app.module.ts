@@ -10,6 +10,7 @@ import { MegaMenuModule } from 'primeng/megamenu';
 import { IssuesComponent } from './issues/issues.component';
 import { MilestonesComponent } from './milestones/milestones.component';
 import { RepositoryComponent } from './repositories/repository/repository.component';
+import { IssueComponent } from './issues/issue/issue.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { RepositoryComponent } from './repositories/repository/repository.compon
     RepositoriesComponent,
     RepositoryComponent,
     IssuesComponent,
-    MilestonesComponent
+    MilestonesComponent,
+    IssueComponent
   ],
   imports: [
     BrowserModule,
