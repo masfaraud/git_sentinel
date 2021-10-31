@@ -353,6 +353,11 @@ class Issue(pony_db.Entity):
     type = pony.orm.Optional(str)
     priority = pony.orm.Optional(str)
     
+    def to_dict(self):
+        d = pony_db.Entity.to_dict(self)
+        d['repository'] = self.repository.to_dict()
+        return d
+    
     @staticmethod
     def type_color(type_):
         colors = {'bug': 'r', 'uncategorized': 'grey'}

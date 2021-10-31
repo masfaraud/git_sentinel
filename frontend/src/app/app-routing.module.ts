@@ -6,6 +6,7 @@ import { RepositoryComponent } from './repositories/repository/repository.compon
 import { IssuesComponent } from './issues/issues.component'
 import { IssueComponent } from './issues/issue/issue.component'
 import { MilestonesComponent } from './milestones/milestones.component'
+import { MilestoneComponent } from './milestones/milestone/milestone.component'
 
 const routes: Routes = [
   { path: 'repositories', component: RepositoriesComponent },
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: 'issues', component: IssuesComponent },
   { path: 'issues/:id', component: IssueComponent },
   { path: 'milestones', component: MilestonesComponent },
+  { path: 'milestones/:id', component: MilestoneComponent },
 ];
 
 @NgModule({

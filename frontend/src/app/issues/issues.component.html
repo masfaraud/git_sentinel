@@ -1,5 +1,23 @@
 <h2>Issues</h2>
 
-<p-card *ngFor="let issue of issues" [routerLink]="['/issues/'+ issue.id]">
-    {{issue.title}}
-</p-card>
+
+<p-table [value]="issues">
+    <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="repository.name">Repository <p-sortIcon field="repository.name"></p-sortIcon></th>
+          <th pSortableColumn="title">Title <p-sortIcon field="title"></p-sortIcon></th>
+          <th pSortableColumn="created_at">created @ <p-sortIcon field="created_at"></p-sortIcon></th>
+          <th pSortableColumn="type">type <p-sortIcon field="type"></p-sortIcon></th>
+          <th pSortableColumn="priority">priority <p-sortIcon field="priority"></p-sortIcon></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-issue>
+        <tr [routerLink]="['/issues/'+ issue.id]">
+            <td>{{issue.repository.name}}</td>
+            <td>{{issue.title}}</td>
+            <td>{{issue.created_at*1000 | date:'short'}}</td>
+            <td>{{issue.type}}</td>
+            <td>{{issue.priority}}</td>
+        </tr>
+    </ng-template>
+</p-table>

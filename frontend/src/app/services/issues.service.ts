@@ -20,4 +20,8 @@ export class IssuesService {
     return this.http.get<Issue[]>(this.repos_url);
   }
 
+  getIssue(issue_id): Observable<Issue> {
+    return this.http.get<Issue>(this.repos_url+'/'+issue_id);
+  }
+
 }

@@ -1,1 +1,9 @@
-<p>issue works!</p>
+<div *ngIf='issue'>
+  <h2>Issue: <a [routerLink]="['/repositories/', issue.repository.id]">{{issue.repository.name}} </a>
+      <a [href]="issue.html_url"  target="_blank">#{{issue.number}}</a></h2>
+
+  <h3>{{issue.title}}</h3>
+
+<nu-markdown-preview [value]='issue.body'></nu-markdown-preview>
+  <!-- <p>{{issue.body}}</p> -->
+</div>

@@ -19,4 +19,8 @@ export class RepositoriesService {
     return this.http.get<Repository[]>(this.repos_url);
   }
 
+  getRepository(repo_id): Observable<Repository> {
+    return this.http.get<Repository>(this.repos_url+'/'+repo_id);
+  }
+
 }
