@@ -19,6 +19,8 @@ import { NuMarkdownModule } from '@ng-util/markdown';
 import { CardModule } from 'primeng/card';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { TableModule } from 'primeng/table';
+import { DevelopersComponent } from './developers/developers.component';
+import { DeveloperComponent } from './developers/developer/developer.component';
 
 
 @NgModule({
@@ -29,7 +31,9 @@ import { TableModule } from 'primeng/table';
     IssuesComponent,
     MilestonesComponent,
     IssueComponent,
-    MilestoneComponent
+    MilestoneComponent,
+    DevelopersComponent,
+    DeveloperComponent
   ],
   imports: [
     BrowserModule,

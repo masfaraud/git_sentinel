@@ -34,6 +34,9 @@ project_manager = gpm_models.ProjectManager(app.config['DB_HOST'],
                                             app.config['DB_NAME'],
                                             app.config['DB_PASSWORD'])
 
+# Enhance this with a sync route!
+project_manager.update()
+
 from git_project_management import __version__
 import git_project_management.routes
 

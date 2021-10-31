@@ -1,3 +1,11 @@
-<h2>Repository: {{repository.name}}</h2>
+<div *ngIf='repository'>
 
-<h3>active: {{repository.active}}</h3>
+  <h2>Repository: {{repository.name}}</h2>
+
+  <h3>active: {{repository.active}}</h3>
+
+  <p-card *ngFor="let developer of repository.assignees" [routerLink]="['/developer/'+ developer.id]">
+      {{developer.first_name}} {{developer.last_name}}
+  </p-card>
+
+</div>

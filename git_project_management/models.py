@@ -16,6 +16,16 @@ STALL_PR_WARNING_TIME = 2*24*3600
 
 pony_db = pony.orm.Database()
 
+class EmailAddress(pony_db.Entity):
+    address = pony.orm.Required(str, 150, unique=True)
+    developer = pony.orm.Required('Developer')
+
+class Developer(pony_db.Entity):
+    email_adresses = pony.orm.Set(EmailAddress)
+    first_name = pony.orm.Required(str, 100)
+    last_name = pony.orm.Required(str, 100)
+    assignee_repositories = pony.orm.Set('Repository')
+
 class GitPlatform(pony_db.Entity):
     base_url = pony.orm.Required(str, 100, unique=True)
     token = pony.orm.Required(str, 100)
@@ -67,6 +77,8 @@ class Repository(pony_db.Entity):
     active = pony.orm.Required(bool, default=False)
     pull_requests = pony.orm.Set('PullRequest')
     milestones = pony.orm.Set('Milestone')
+    assignees = pony.orm.Set('Developer')
+    
 
     def __str__(self):
         return self.owner + '.' + self.name
@@ -101,9 +113,8 @@ class Repository(pony_db.Entity):
                 'number_no_milestones_open_issues': no_milestones_open_issues.count()}
     
     def to_dict(self, stats=False):
-        d = {'name': self.name,
-             'active': self.active,
-             'id': self.id}
+        d = pony_db.Entity.to_dict(self)
+        d['assignees'] = [d.to_dict() for d in self.assignees]
         
         if stats:
             d.update(self.stats())
@@ -338,6 +349,29 @@ class GiteaRepository(Repository):
             if req_pr['merged_at']:
                 pull_request.merged_at = int(ciso8601.parse_datetime(req_pr['merged_at']).timestamp())
     
+    @pony.orm.db_session()
+    def get_assignees(self):
+        req = requests.get('{}/repos/{}/{}/assignees'.format(self.platform.api_url, self.owner, self.name),
+                           params={'access_token': self.platform.token})
+        for req_dev in req.json():
+            email = EmailAddress.get(address=req_dev['email'])
+            if not email:
+                name_segments = req_dev['full_name'].split(' ')
+                first_name = ' '.join(name_segments[:-1])
+                last_name = name_segments[-1]
+                if not (first_name and last_name):
+                    continue
+                
+                dev = Developer.get(first_name=first_name, last_name=last_name)
+                if not dev:
+                    dev = Developer(first_name=first_name, last_name=last_name)
+                email = EmailAddress(address=req_dev['email'], developer=dev)
+                
+            if not email.developer in self.assignees:
+                self.assignees.add(email.developer)
+            
+                
+    
 class Issue(pony_db.Entity):
     number = pony.orm.Required(int)
     repository = pony.orm.Required(Repository)
@@ -448,9 +482,9 @@ class ProjectManager:
             platform.get_repos()
         for repo in Repository.select(lambda r:r.active):
             # print(repo)
+            repo.get_assignees()
             repo.get_issues()
             repo.get_pull_requests()
-    
     # @property
     # def issues(self):
     #     return Issue.select(lambda i:True)

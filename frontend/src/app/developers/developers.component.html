@@ -1,0 +1,20 @@
+<div *ngIf='developers'>
+
+  <h2>Developers</h2>
+
+
+  <p-table [value]="developers">
+      <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="developer.first_name">First name <p-sortIcon field="developer.first_name"></p-sortIcon></th>
+            <th pSortableColumn="developer.last_name">Last_name <p-sortIcon field="developer.last_name"></p-sortIcon></th>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-developer>
+          <tr [routerLink]="['/developers/'+ developer.id]">
+              <td>{{developer.first_name}}</td>
+              <td>{{developer.last_name}}</td>
+          </tr>
+      </ng-template>
+  </p-table>
+</div>

@@ -41,6 +41,7 @@ export class AppComponent {
                 },
                 {label: 'Issues', icon: 'pi pi-ticket', routerLink: '/issues'},
                 {label: 'Milestones', icon: 'pi pi-tag', routerLink: '/milestones'},
+                {label: 'Developers', icon: 'pi pi-user', routerLink: '/developers'},
 
             ]
       }
