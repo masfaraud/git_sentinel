@@ -18,17 +18,53 @@ pony_db = pony.orm.Database()
 
 class EmailAddress(pony_db.Entity):
     address = pony.orm.Required(str, 150, unique=True)
-    developer = pony.orm.Required('Developer')
+    developer_accounts = pony.orm.Set('DeveloperAccount')
+
+class DeveloperAccount(pony_db.Entity):
+    email_address = pony.orm.Required(EmailAddress)
+    platform = pony.orm.Required('GitPlatform')
+    full_name = pony.orm.Optional(str, 120)
+    login = pony.orm.Required(str, 100)
+    developer = pony.orm.Optional('Developer')
+
+    def to_dict(self, full_infos=False):
+        d = pony_db.Entity.to_dict(self)
+        d['email_address'] = self.email_address.to_dict()
+        d['platform'] = self.platform.to_dict()
+        return d
 
 class Developer(pony_db.Entity):
-    email_adresses = pony.orm.Set(EmailAddress)
-    first_name = pony.orm.Required(str, 100)
-    last_name = pony.orm.Required(str, 100)
+    full_name = pony.orm.Optional(str, 120)
+    accounts = pony.orm.Set(DeveloperAccount)
     assignee_repositories = pony.orm.Set('Repository')
+    assignee_issues = pony.orm.Set('Issue')
+    created_issues = pony.orm.Set('Issue')
+    
+    def number_issues_solved(self):
+        return self.assignee_issues.select(lambda i:i.closed).count()
+
+    def number_open_issues_assigned(self):
+        return self.assignee_issues.select(lambda i:not i.closed).count()
+
+    # def number_open_issues_assigned(self):
+    #     return self.assignee_issues.select(lambda i:i.state=='open').count()
+
+    
+    def to_dict(self, full_infos=False):
+        d = pony_db.Entity.to_dict(self)
+        d['number_issues_solved'] = self.number_issues_solved()
+        d['number_open_issues_assigned'] = self.number_open_issues_assigned()
+        if full_infos:
+            d['assignee_repositories'] = [r.to_dict() for r in self.assignee_repositories]
+            d['assignee_issues'] = [i.to_dict() for i in self.assignee_issues]
+            d['accounts'] = [a.to_dict() for a in self.accounts]
+        return d
+
 
 class GitPlatform(pony_db.Entity):
     base_url = pony.orm.Required(str, 100, unique=True)
     token = pony.orm.Required(str, 100)
+    developer_accounts = pony.orm.Set(DeveloperAccount)
 
     def to_dict(self):
         # DO Not put token in dict!!!
@@ -38,6 +74,57 @@ class GitPlatform(pony_db.Entity):
     @property
     def api_url(self):
         return '{}/api/v1'.format(self.base_url)
+
+    def get_dev_account(self, email_str, full_name, login):
+
+        email = EmailAddress.get(address=email_str)
+        if not email:
+            email = EmailAddress(address=email_str)
+                
+
+        dev_account = self.developer_accounts.select(lambda d:d.email_address.address==email_str).first()
+        if dev_account:
+            return dev_account
+
+        dev_account = DeveloperAccount.get(login=login)
+        if dev_account:
+            # updating email
+            dev_account.email_address = email
+            return dev_account
+
+
+
+        # No dev account. Maybe a dev to match with?
+        dev_account = DeveloperAccount(login=login, full_name=full_name,
+                                       email_address=email, platform=self)
+        
+        if full_name:
+            dev = Developer.get(full_name=full_name)
+        elif login:
+            dev = Developer.get(login=login)
+        else:
+            dev = None
+        
+        if dev:
+            dev_account.developer = dev
+            dev_account.email_address = email
+            return dev_account
+        
+        # if full_name:
+        #     name_segments = full_name.split(' ')
+        #     first_name = ' '.join(name_segments[:-1])
+        #     last_name = name_segments[-1]
+            
+        #     reverse_full_name = '{} {}'.format(last_name, first_name)      
+        #     dev = Developer.get(full_name=reverse_full_name)
+
+        # if not dev:
+        dev = Developer(full_name=full_name, login=login)
+        dev.accounts.add(dev_account)
+            
+        # email = EmailAddress(address=email_str, developer=dev)
+        return dev_account
+
 
 class GithubPlatform(GitPlatform):
     username = pony.orm.Required(str, 100, unique=True)
@@ -112,10 +199,11 @@ class Repository(pony_db.Entity):
                 'number_unprioritized_open_issues': unprio_open_issues.count(),
                 'number_no_milestones_open_issues': no_milestones_open_issues.count()}
     
-    def to_dict(self, stats=False):
+    def to_dict(self,full_infos=False, stats=False):
         d = pony_db.Entity.to_dict(self)
         d['assignees'] = [d.to_dict() for d in self.assignees]
-        
+        if full_infos:
+            d['issues'] = [i.to_dict() for i in self.issues]
         if stats:
             d.update(self.stats())
         
@@ -262,6 +350,17 @@ class GiteaRepository(Repository):
                 updated_at = int(ciso8601.parse_datetime(req_issue['updated_at']).timestamp())
                 closed = req_issue['state']=='closed'
                 
+                creator_account = self.platform.get_dev_account(req_issue['user']['email'],
+                                                                req_issue['user']['full_name'],
+                                                                req_issue['user']['login'])
+                creator = None
+                if not creator_account:
+                    print(req_issue['user'])
+                else:
+                    if creator_account.developer:
+                        creator = creator_account.developer
+                        
+
                 if not issue:
                     issue = Issue(number=req_issue['number'],
                                   repository=self,
@@ -271,12 +370,14 @@ class GiteaRepository(Repository):
                                   html_url=req_issue['html_url'],
                                   closed=closed,
                                   created_at=created_at,
-                                  updated_at=updated_at
+                                  updated_at=updated_at,
+                                  created_by=creator
                                   )
                 else:
                     issue.title = req_issue['title']
                     issue.body = req_issue['body']
                     issue.closed = closed
+                    issue.created_by = creator
     
                 if req_issue['labels']:
                     for label in req_issue['labels']:
@@ -310,6 +411,14 @@ class GiteaRepository(Repository):
     
                 if req_issue['closed_at']:
                     issue.closed_at = int(ciso8601.parse_datetime(req_issue['closed_at']).timestamp())
+                    
+                if req_issue['assignee']:
+                    dev_account = self.platform.get_dev_account(req_issue['assignee']['email'],
+                                                                req_issue['assignee']['full_name'],
+                                                                req_issue['assignee']['login'])
+                    if dev_account and dev_account.developer:
+                        issue.assignee = dev_account.developer
+    
     
             page_number_issues = len(req.json())
             page_number += 1
@@ -354,23 +463,12 @@ class GiteaRepository(Repository):
         req = requests.get('{}/repos/{}/{}/assignees'.format(self.platform.api_url, self.owner, self.name),
                            params={'access_token': self.platform.token})
         for req_dev in req.json():
-            email = EmailAddress.get(address=req_dev['email'])
-            if not email:
-                name_segments = req_dev['full_name'].split(' ')
-                first_name = ' '.join(name_segments[:-1])
-                last_name = name_segments[-1]
-                if not (first_name and last_name):
-                    continue
-                
-                dev = Developer.get(first_name=first_name, last_name=last_name)
-                if not dev:
-                    dev = Developer(first_name=first_name, last_name=last_name)
-                email = EmailAddress(address=req_dev['email'], developer=dev)
-                
-            if not email.developer in self.assignees:
-                self.assignees.add(email.developer)
             
-                
+            dev_account = self.platform.get_dev_account(req_dev['email'], req_dev['full_name'], req_dev['login'])                
+            if dev_account and not dev_account.developer in self.assignees:
+                self.assignees.add(dev_account.developer)
+
+    
     
 class Issue(pony_db.Entity):
     number = pony.orm.Required(int)
@@ -386,10 +484,14 @@ class Issue(pony_db.Entity):
     milestone = pony.orm.Optional('Milestone')
     type = pony.orm.Optional(str)
     priority = pony.orm.Optional(str)
+    created_by = pony.orm.Optional(Developer, reverse='created_issues')
+    assignee = pony.orm.Optional(Developer, reverse='assignee_issues')
+
     
     def to_dict(self):
         d = pony_db.Entity.to_dict(self)
         d['repository'] = self.repository.to_dict()
+        d['created_by'] = self.created_by.to_dict()
         return d
     
     @staticmethod
@@ -430,6 +532,11 @@ class PullRequest(pony_db.Entity):
     created_at = pony.orm.Required(int)
     merged_at = pony.orm.Optional(int)
     updated_at = pony.orm.Required(int)
+    
+    def to_dict(self,full_infos=False):
+        d = pony_db.Entity.to_dict(self)
+        d['repository'] = self.repository.to_dict()        
+        return d
     
     @classmethod
     def mergeable_pull_requests(cls):

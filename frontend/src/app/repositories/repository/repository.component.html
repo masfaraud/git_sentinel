@@ -1,11 +1,16 @@
+<p-progressSpinner *ngIf='!repository'></p-progressSpinner>
+
 <div *ngIf='repository'>
 
   <h2>Repository: {{repository.name}}</h2>
 
   <h3>active: {{repository.active}}</h3>
 
-  <p-card *ngFor="let developer of repository.assignees" [routerLink]="['/developer/'+ developer.id]">
-      {{developer.first_name}} {{developer.last_name}}
+  <p-card *ngFor="let developer of repository.assignees" [routerLink]="['/developers/'+ developer.id]">
+      {{developer.full_name}}
   </p-card>
+
+  <h3>Issues</h3>
+  <app-issues-table [issues]='repository.issues'></app-issues-table>
 
 </div>

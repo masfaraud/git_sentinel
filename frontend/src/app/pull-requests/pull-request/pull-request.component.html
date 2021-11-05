@@ -1,0 +1,11 @@
+<p-progressSpinner *ngIf='!pull_request'></p-progressSpinner>
+
+<div *ngIf='pull_request'>
+  <h2>Pull request: <a [routerLink]="['/repositories/', pull_request.repository.id]">{{pull_request.repository.name}} </a>
+      <a [href]="pull_request.html_url"  target="_blank">#{{pull_request.number}}</a></h2>
+
+  <h3>{{pull_request.title}}</h3>
+
+<nu-markdown-preview [value]='pull_request.body'></nu-markdown-preview>
+  <!-- <p>{{issue.body}}</p> -->
+</div>

@@ -1,6 +1,12 @@
+<p-progressSpinner *ngIf='!issue'></p-progressSpinner>
+
 <div *ngIf='issue'>
   <h2>Issue: <a [routerLink]="['/repositories/', issue.repository.id]">{{issue.repository.name}} </a>
-      <a [href]="issue.html_url"  target="_blank">#{{issue.number}}</a></h2>
+      <a [href]="issue.html_url"  target="_blank">#{{issue.number}}</a>
+      <p-tag *ngIf='!issue.closed' severity='success' value="Open"></p-tag>
+      <p-tag *ngIf='issue.closed' severity='danger' value="Closed"></p-tag>
+
+  </h2>
 
   <h3>{{issue.title}}</h3>
 

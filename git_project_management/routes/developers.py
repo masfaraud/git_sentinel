@@ -38,3 +38,12 @@ def list_devs():
                     'limit': limit,
                     'offset': offset})
 
+@app.route('/developers/<int:developer_id>')
+@pony.orm.db_session()
+def developer_details(developer_id):
+
+    dev = Developer.get(id=developer_id)
+    if not dev:
+        return 'No such developer', 404
+    
+    return jsonify(dev.to_dict(full_infos=True))

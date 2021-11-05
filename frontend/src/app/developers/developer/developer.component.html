@@ -1,1 +1,15 @@
-<p>developer works!</p>
+<p-progressSpinner *ngIf='!developer'></p-progressSpinner>
+
+<div *ngIf='developer'>
+  <h2>{{developer.full_name}}</h2>
+
+  <h3>Accounts</h3>
+  <p *ngFor='let account of developer.accounts'>{{account.platform.base_url}} {{account.login}} {{account.email_address.address}}</p>
+
+  <h3>Issues</h3>
+  <p>{{developer.number_open_issues_assigned}} open issues assigned</p>
+  <p>{{developer.number_issues_solved}} issues solved</p>
+
+  <app-issues-table [issues]='developer.assignee_issues'></app-issues-table>
+
+</div>

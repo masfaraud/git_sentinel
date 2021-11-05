@@ -1,19 +1,22 @@
+<h2>Developers</h2>
+
+<p-progressSpinner *ngIf='!developers'></p-progressSpinner>
+
 <div *ngIf='developers'>
-
-  <h2>Developers</h2>
-
 
   <p-table [value]="developers">
       <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="developer.first_name">First name <p-sortIcon field="developer.first_name"></p-sortIcon></th>
-            <th pSortableColumn="developer.last_name">Last_name <p-sortIcon field="developer.last_name"></p-sortIcon></th>
+            <th pSortableColumn="full_name">Name <p-sortIcon field="full_name"></p-sortIcon></th>
+            <th pSortableColumn="number_open_issues_assigned">Number issues assigned<p-sortIcon field="number_open_issues_assigned"></p-sortIcon></th>
+            <th pSortableColumn="number_issues_solved">Number issues solved<p-sortIcon field="number_issues_solved"></p-sortIcon></th>
           </tr>
       </ng-template>
       <ng-template pTemplate="body" let-developer>
           <tr [routerLink]="['/developers/'+ developer.id]">
-              <td>{{developer.first_name}}</td>
-              <td>{{developer.last_name}}</td>
+              <td>{{developer.full_name}}</td>
+              <td>{{developer.number_open_issues_assigned}}</td>
+              <td>{{developer.number_issues_solved}}</td>
           </tr>
       </ng-template>
   </p-table>

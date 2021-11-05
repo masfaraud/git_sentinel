@@ -10,6 +10,11 @@ import { MilestonesComponent } from './milestones/milestones.component';
 import { RepositoryComponent } from './repositories/repository/repository.component';
 import { IssueComponent } from './issues/issue/issue.component';
 import { MilestoneComponent } from './milestones/milestone/milestone.component';
+import { DevelopersComponent } from './developers/developers.component';
+import { DeveloperComponent } from './developers/developer/developer.component';
+import { IssuesTableComponent } from './issues/issues-table/issues-table.component';
+import { PullRequestsComponent } from './pull-requests/pull-requests.component';
+import { PullRequestComponent } from './pull-requests/pull-request/pull-request.component';
 
 import { NgPipesModule } from "ngx-pipes";
 
@@ -19,9 +24,8 @@ import { NuMarkdownModule } from '@ng-util/markdown';
 import { CardModule } from 'primeng/card';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { TableModule } from 'primeng/table';
-import { DevelopersComponent } from './developers/developers.component';
-import { DeveloperComponent } from './developers/developer/developer.component';
-
+import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import { TagModule } from 'primeng/tag';
 
 @NgModule({
   declarations: [
@@ -33,15 +37,20 @@ import { DeveloperComponent } from './developers/developer/developer.component';
     IssueComponent,
     MilestoneComponent,
     DevelopersComponent,
-    DeveloperComponent
+    DeveloperComponent,
+    IssuesTableComponent,
+    PullRequestsComponent,
+    PullRequestComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     CardModule,
+    TagModule,
     MegaMenuModule,
     TableModule,
+    ProgressSpinnerModule,
     NgPipesModule,
     NuMarkdownModule.forRoot()
   ],

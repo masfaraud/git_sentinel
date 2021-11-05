@@ -13,33 +13,10 @@ export class AppComponent {
   ngOnInit() {
 
     this.items = [
-                {
-                    label: 'Repositories', icon: 'pi pi-fw pi-clone',
-                    routerLink: '/repositories'
-                    // items: [
-                    //     [
-                    //         {
-                    //             label: 'Video 1',
-                    //             items: [{label: 'Video 1.1'}, {label: 'Video 1.2'}]
-                    //         },
-                    //         {
-                    //             label: 'Video 2',
-                    //             items: [{label: 'Video 2.1'}, {label: 'Video 2.2'}]
-                    //         }
-                    //     ],
-                    //     [
-                    //         {
-                    //             label: 'Video 3',
-                    //             items: [{label: 'Video 3.1'}, {label: 'Video 3.2'}]
-                    //         },
-                    //         {
-                    //             label: 'Video 4',
-                    //             items: [{label: 'Video 4.1'}, {label: 'Video 4.2'}]
-                    //         }
-                    //     ]
-                    // ]
-                },
+                {label: 'Repositories', icon: 'pi pi-fw pi-clone',
+                 routerLink: '/repositories'},
                 {label: 'Issues', icon: 'pi pi-ticket', routerLink: '/issues'},
+                {label: 'Pull requests', icon: 'pi pi-reply', routerLink: '/pull-requests'},
                 {label: 'Milestones', icon: 'pi pi-tag', routerLink: '/milestones'},
                 {label: 'Developers', icon: 'pi pi-user', routerLink: '/developers'},
 

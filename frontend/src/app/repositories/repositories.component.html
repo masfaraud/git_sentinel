@@ -1,4 +1,8 @@
+
+
 <h2>Repositories</h2>
+
+<p-progressSpinner *ngIf='!repositories'></p-progressSpinner>
 
 <p-card *ngFor="let repo of repositories" [routerLink]="['/repositories/'+ repo.id]">
     {{repo.name}}
