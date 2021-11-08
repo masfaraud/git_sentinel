@@ -4,7 +4,7 @@
 
 <div *ngIf='developers'>
 
-  <p-table [value]="developers">
+  <p-table [value]="developers" [paginator]="true" [rows]="10">
       <ng-template pTemplate="header">
           <tr>
             <th pSortableColumn="full_name">Name <p-sortIcon field="full_name"></p-sortIcon></th>

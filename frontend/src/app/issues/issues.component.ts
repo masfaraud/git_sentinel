@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IssuesService } from "../services/issues.service";
-import { Issue } from "../models";
+import { Issue, IssuesStats } from "../models";
 
 @Component({
   selector: 'app-issues',
@@ -10,12 +10,16 @@ import { Issue } from "../models";
 export class IssuesComponent implements OnInit {
 
   issues: Issue[];
+  stats: IssuesStats;
+
   constructor(
     private issuesService: IssuesService,
   ) { }
 
   ngOnInit(): void {
+    // this.stats = [];
     this.getIssues();
+    this.getStats();
   }
 
   getIssues() {
@@ -29,5 +33,18 @@ export class IssuesComponent implements OnInit {
       }
     );
   }
+
+  getStats() {
+  this.issuesService
+    .getStats()
+    .subscribe(
+      (res) => {
+        this.stats = res['stats'];
+      },
+      (error) => {
+      }
+    );
+  }
+
 
 }

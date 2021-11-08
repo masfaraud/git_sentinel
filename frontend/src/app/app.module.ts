@@ -4,6 +4,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
 import { RepositoriesComponent } from './repositories/repositories.component';
 import { IssuesComponent } from './issues/issues.component';
 import { MilestonesComponent } from './milestones/milestones.component';
@@ -26,6 +28,8 @@ import { MegaMenuModule } from 'primeng/megamenu';
 import { TableModule } from 'primeng/table';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
+import { KnobModule } from 'primeng/knob';
+import { IssuesStatsComponent } from './issues/issues-stats/issues-stats.component';
 
 @NgModule({
   declarations: [
@@ -40,19 +44,22 @@ import { TagModule } from 'primeng/tag';
     DeveloperComponent,
     IssuesTableComponent,
     PullRequestsComponent,
-    PullRequestComponent
+    PullRequestComponent,
+    IssuesStatsComponent
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
     CardModule,
     TagModule,
     MegaMenuModule,
     TableModule,
+    KnobModule,
     ProgressSpinnerModule,
     NgPipesModule,
-    NuMarkdownModule.forRoot()
+    NuMarkdownModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

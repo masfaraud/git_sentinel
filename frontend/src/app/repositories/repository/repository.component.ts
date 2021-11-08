@@ -13,7 +13,6 @@ import { Repository } from "../../models";
 export class RepositoryComponent implements OnInit {
   repository: Repository;
   repository_id: number;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,

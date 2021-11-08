@@ -83,32 +83,37 @@ class GitPlatform(pony_db.Entity):
                 
 
         dev_account = self.developer_accounts.select(lambda d:d.email_address.address==email_str).first()
-        if dev_account:
-            return dev_account
+        # if dev_account:
+        #     return dev_account
 
-        dev_account = DeveloperAccount.get(login=login)
-        if dev_account:
-            # updating email
-            dev_account.email_address = email
-            return dev_account
+        if not dev_account:
+            dev_account = DeveloperAccount.get(login=login)
+
+            if dev_account:
+                # updating email
+                dev_account.email_address = email
+                return dev_account
 
 
-
-        # No dev account. Maybe a dev to match with?
-        dev_account = DeveloperAccount(login=login, full_name=full_name,
-                                       email_address=email, platform=self)
+        if not dev_account:
+            # No dev account. Maybe a dev to match with?
+            dev_account = DeveloperAccount(login=login, full_name=full_name,
+                                           email_address=email, platform=self)
         
-        if full_name:
+        dev = None
+        if dev_account:
+            dev = dev_account.developer
+            
+        elif full_name:
             dev = Developer.get(full_name=full_name)
         elif login:
-            dev = Developer.get(login=login)
-        else:
-            dev = None
+            dev = Developer.get(full_name=login)
         
-        if dev:
-            dev_account.developer = dev
-            dev_account.email_address = email
-            return dev_account
+        if not dev:
+            if full_name:
+                dev = Developer(full_name=full_name)
+            else:
+                dev = Developer(full_name=login)
         
         # if full_name:
         #     name_segments = full_name.split(' ')
@@ -118,8 +123,12 @@ class GitPlatform(pony_db.Entity):
         #     reverse_full_name = '{} {}'.format(last_name, first_name)      
         #     dev = Developer.get(full_name=reverse_full_name)
 
-        # if not dev:
-        dev = Developer(full_name=full_name, login=login)
+        dev_account.developer = dev
+        dev_account.email_address = email
+        if not dev.full_name and dev_account.full_name:
+            print('updating full name')
+            dev.full_name = dev_account.full_name
+
         dev.accounts.add(dev_account)
             
         # email = EmailAddress(address=email_str, developer=dev)
@@ -187,25 +196,17 @@ class Repository(pony_db.Entity):
     
     def issue_priorities(self):
         return list(set([i.priority for i in self.issues.select(lambda j:len(j.priority)>0)]))
-
-    def stats(self):
-        open_issues = self.issues.select(lambda i:not i.closed)
-        uncat_open_issues = self.issues.select(lambda i:not i.closed and not i.type)
-        unprio_open_issues = self.issues.select(lambda i:not i.closed and not i.priority)
-        no_milestones_open_issues = self.issues.select(lambda i:not i.closed and not i.milestone)
-        
-        return {'number_open_issues': open_issues.count(),
-                'number_uncategorized_open_issues': uncat_open_issues.count(),
-                'number_unprioritized_open_issues': unprio_open_issues.count(),
-                'number_no_milestones_open_issues': no_milestones_open_issues.count()}
     
-    def to_dict(self,full_infos=False, stats=False):
+    def stats(self):
+        return Issue.stats(self.issues)
+    
+    def to_dict(self, full_infos=False, stats=False):
         d = pony_db.Entity.to_dict(self)
         d['assignees'] = [d.to_dict() for d in self.assignees]
         if full_infos:
             d['issues'] = [i.to_dict() for i in self.issues]
         if stats:
-            d.update(self.stats())
+            d['issues_stats'] = self.stats()
         
         return d
 
@@ -349,19 +350,21 @@ class GiteaRepository(Repository):
                 created_at = int(ciso8601.parse_datetime(req_issue['created_at']).timestamp())
                 updated_at = int(ciso8601.parse_datetime(req_issue['updated_at']).timestamp())
                 closed = req_issue['state']=='closed'
+                print('state', req_issue['state'], closed)
                 
                 creator_account = self.platform.get_dev_account(req_issue['user']['email'],
                                                                 req_issue['user']['full_name'],
                                                                 req_issue['user']['login'])
                 creator = None
                 if not creator_account:
-                    print(req_issue['user'])
+                    print('no creator', req_issue['user'])
                 else:
                     if creator_account.developer:
                         creator = creator_account.developer
                         
 
                 if not issue:
+                    print('created an issue')
                     issue = Issue(number=req_issue['number'],
                                   repository=self,
                                   title=req_issue['title'],
@@ -487,13 +490,30 @@ class Issue(pony_db.Entity):
     created_by = pony.orm.Optional(Developer, reverse='created_issues')
     assignee = pony.orm.Optional(Developer, reverse='assignee_issues')
 
-    
+        
+
     def to_dict(self):
         d = pony_db.Entity.to_dict(self)
         d['repository'] = self.repository.to_dict()
         d['created_by'] = self.created_by.to_dict()
         return d
-    
+
+    @classmethod
+    def stats(cls, issues=None):
+        if issues is None:
+            open_issues = cls.select(lambda i: not i.closed)
+        else:
+            open_issues = issues.select(lambda i: not i.closed)
+        uncat = open_issues.filter(lambda i: not i.type).count()
+        unprio = open_issues.filter(lambda i: not i.priority).count()
+        uncat_unprio = open_issues.filter(lambda i: not i.priority or not i.type).count()
+        d = {'number_open_issues': open_issues.count(),
+             'number_issues_uncategorized': uncat,
+             'number_issues_unprioritized': unprio,
+             'number_issues_unprioritized_uncategorized': uncat_unprio
+             }
+        return d
+        
     @staticmethod
     def type_color(type_):
         colors = {'bug': 'r', 'uncategorized': 'grey'}

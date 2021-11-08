@@ -34,3 +34,5 @@ def repo_details(repo_id):
         return 'No such repo', 404
     
     return jsonify(repo.to_dict(stats=True, full_infos=True))
+
+

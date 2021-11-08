@@ -41,6 +41,13 @@ def list_issues():
                     'limit': limit,
                     'offset': offset})
 
+@app.route('/issues/stats')
+@pony.orm.db_session()
+def issues_stats():
+    # number_weeks = request.args.get('number_weeks', type=str, default='id')
+    
+    stats = Issue.stats()
+    return jsonify({'stats': stats})
 
 @app.route('/issues/<int:issue_id>')
 @pony.orm.db_session()

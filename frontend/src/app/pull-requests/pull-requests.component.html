@@ -1,12 +1,13 @@
 <p-progressSpinner *ngIf='!pull_requests'></p-progressSpinner>
 
-<p-table [value]="pull_requests">
+<p-table [value]="pull_requests" [paginator]="true" [rows]="10">
     <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="repository.name">Repository <p-sortIcon field="repository.name"></p-sortIcon></th>
           <th pSortableColumn="title">Title <p-sortIcon field="title"></p-sortIcon></th>
           <th pSortableColumn="created_at">created @<p-sortIcon field="created_at"></p-sortIcon></th>
           <th pSortableColumn="merged">Merged<p-sortIcon field="merged"></p-sortIcon></th>
+          <th pSortableColumn="mergeable">Mergeable<p-sortIcon field="mergeable"></p-sortIcon></th>
           <th pSortableColumn="base_branch">Base<p-sortIcon field="base_branch"></p-sortIcon></th>
           <th pSortableColumn="head_branch">Head<p-sortIcon field="head_branch"></p-sortIcon></th>
         </tr>
@@ -15,8 +16,9 @@
         <tr [routerLink]="['/pull-requests/'+ pull_request.id]">
             <td>{{pull_request.repository.name}}</td>
             <td>{{pull_request.title}}</td>
-            <td>{{pull_request.created_at*1000 | date:'short'}}</td>
+            <td>{{pull_request.created_at*1000 | date:'mediumDate'}}</td>
             <td>{{pull_request.merged}}</td>
+            <td>{{pull_request.mergeable}}</td>
             <td>{{pull_request.base_branch}}</td>
             <td>{{pull_request.head_branch}}</td>
         </tr>

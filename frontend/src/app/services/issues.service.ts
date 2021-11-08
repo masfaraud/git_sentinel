@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Issue } from '../models';
+import { Issue, IssuesStats } from '../models';
 import { environment } from '../../environments/environment';
 
 
@@ -24,4 +24,7 @@ export class IssuesService {
     return this.http.get<Issue>(this.repos_url+'/'+issue_id);
   }
 
+  getStats(): Observable<IssuesStats> {
+    return this.http.get<IssuesStats>(this.repos_url+'/stats');
+  }
 }

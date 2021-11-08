@@ -1,4 +1,4 @@
-<p-table [value]="issues">
+<p-table [value]="issues" [paginator]="true" [rows]="10">
     <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="repository.name">Repository <p-sortIcon field="repository.name"></p-sortIcon></th>
@@ -13,7 +13,7 @@
         <tr [routerLink]="['/issues/'+ issue.id]">
             <td>{{issue.repository.name}}</td>
             <td>{{issue.title}}</td>
-            <td>{{issue.created_at*1000 | date:'short'}}</td>
+            <td>{{issue.created_at*1000 | date:'mediumDate'}}</td>
             <td>{{issue.closed}}</td>
             <td>{{issue.type}}</td>
             <td>{{issue.priority}}</td>

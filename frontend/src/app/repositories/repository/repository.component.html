@@ -5,6 +5,8 @@
   <h2>Repository: {{repository.name}}</h2>
 
   <h3>active: {{repository.active}}</h3>
+  <h3>Stats</h3>
+  <app-issues-stats [issues_stats]='repository.issues_stats'></app-issues-stats>
 
   <p-card *ngFor="let developer of repository.assignees" [routerLink]="['/developers/'+ developer.id]">
       {{developer.full_name}}

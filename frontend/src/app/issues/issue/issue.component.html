@@ -3,8 +3,16 @@
 <div *ngIf='issue'>
   <h2>Issue: <a [routerLink]="['/repositories/', issue.repository.id]">{{issue.repository.name}} </a>
       <a [href]="issue.html_url"  target="_blank">#{{issue.number}}</a>
-      <p-tag *ngIf='!issue.closed' severity='success' value="Open"></p-tag>
-      <p-tag *ngIf='issue.closed' severity='danger' value="Closed"></p-tag>
+      <p-tag *ngIf='!issue.closed' severity='success' value="Open" rounded='true'></p-tag>
+      <p-tag *ngIf='issue.closed' severity='danger' value="Closed" rounded='true'></p-tag>
+
+      <p-tag *ngIf='issue.priority=="low"' severity='info' value="Priority: low" rounded='true'></p-tag>
+      <p-tag *ngIf='issue.priority=="medium"' severity='warning' value="Priority: medium" rounded='true'></p-tag>
+      <p-tag *ngIf='issue.priority=="high"' severity='danger' value="Priority: high" rounded='true'></p-tag>
+      <p-tag *ngIf='issue.priority=="critical"' severity='danger' value="Priority: critical" rounded='true'></p-tag>
+
+      <p-tag *ngIf='issue.type=="enhancement"' severity='info' value="Type: enhancement" rounded='true'></p-tag>
+      <p-tag *ngIf='issue.type=="bug"' severity='danger' value="Type: bug" rounded='true'></p-tag>
 
   </h2>
 

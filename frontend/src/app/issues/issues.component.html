@@ -1,5 +1,7 @@
 <h2>Issues</h2>
 
+<app-issues-stats [issues_stats]='stats'></app-issues-stats>
+
 <p-progressSpinner *ngIf='!issues'></p-progressSpinner>
 
 <app-issues-table [issues]='issues'></app-issues-table>
