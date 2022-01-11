@@ -2,6 +2,8 @@
 
 <p-megaMenu [model]="items">
     <!-- <button pButton label="Logout" icon="pi pi-sign-out"></button> -->
+    <button *ngIf='!last_update_failed' pButton type="button" label="Update" (click)="update()" [loading]="updating"></button>
+    <button *ngIf='last_update_failed' pButton type="button" label="Retry upddate" class="p-button-danger" (click)="update()" [loading]="updating"></button>
 </p-megaMenu>
 
 <router-outlet></router-outlet>

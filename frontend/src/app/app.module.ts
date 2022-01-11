@@ -23,6 +23,7 @@ import { NgPipesModule } from "ngx-pipes";
 import { NuMarkdownModule } from '@ng-util/markdown';
 
 // PrimeNG
+import {ButtonModule} from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { TableModule } from 'primeng/table';
@@ -30,6 +31,7 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { KnobModule } from 'primeng/knob';
 import { IssuesStatsComponent } from './issues/issues-stats/issues-stats.component';
+import { BranchesComponent } from './branches/branches.component';
 
 @NgModule({
   declarations: [
@@ -45,13 +47,15 @@ import { IssuesStatsComponent } from './issues/issues-stats/issues-stats.compone
     IssuesTableComponent,
     PullRequestsComponent,
     PullRequestComponent,
-    IssuesStatsComponent
+    IssuesStatsComponent,
+    BranchesComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
+    ButtonModule,
     CardModule,
     TagModule,
     MegaMenuModule,

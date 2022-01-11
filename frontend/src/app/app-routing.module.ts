@@ -4,6 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { RepositoriesComponent } from './repositories/repositories.component'
 import { RepositoryComponent } from './repositories/repository/repository.component';
 import { IssuesComponent } from './issues/issues.component'
+import { BranchesComponent } from './branches/branches.component'
 import { IssueComponent } from './issues/issue/issue.component'
 import { MilestonesComponent } from './milestones/milestones.component'
 import { MilestoneComponent } from './milestones/milestone/milestone.component'
@@ -24,6 +25,8 @@ const routes: Routes = [
   { path: 'developers/:id', component: DeveloperComponent },
   { path: 'pull-requests', component: PullRequestsComponent },
   { path: 'pull-requests/:id', component: PullRequestComponent },
+  { path: 'branches', component: BranchesComponent },
+
 ];
 
 @NgModule({
