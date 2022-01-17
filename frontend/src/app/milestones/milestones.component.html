@@ -1,1 +1,5 @@
-<p>milestones works!</p>
+<h2>Milestones</h2>
+
+<p-progressSpinner *ngIf='!milestones'></p-progressSpinner>
+
+<app-milestones-table [milestones]='milestones'></app-milestones-table>

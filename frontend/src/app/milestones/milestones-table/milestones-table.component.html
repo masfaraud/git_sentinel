@@ -1,0 +1,22 @@
+<p-table [value]="milestones" [paginator]="true" [rows]="10">
+    <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="repository.name">Repository <p-sortIcon field="repository.name"></p-sortIcon></th>
+          <th pSortableColumn="title">Title <p-sortIcon field="title"></p-sortIcon></th>
+          <th pSortableColumn="created_at">created @ <p-sortIcon field="created_at"></p-sortIcon></th>
+          <!-- <th pSortableColumn="closed">Closed <p-sortIcon field="closed"></p-sortIcon></th>
+          <th pSortableColumn="type">type <p-sortIcon field="type"></p-sortIcon></th>
+          <th pSortableColumn="priority">priority <p-sortIcon field="priority"></p-sortIcon></th> -->
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-milestone>
+        <tr [routerLink]="['/milestones/'+ milestone.id]">
+            <td>{{milestone.repository.name}}</td>
+            <td>{{milestone.title}}</td>
+            <td>{{milestone.due_on*1000 | date:'mediumDate'}}</td>
+            <!-- <td>{{milestone.closed}}</td>
+            <td>{{issue.type}}</td>
+            <td>{{issue.priority}}</td> -->
+        </tr>
+    </ng-template>
+</p-table>

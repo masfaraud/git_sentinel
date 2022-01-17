@@ -32,6 +32,7 @@ import { TagModule } from 'primeng/tag';
 import { KnobModule } from 'primeng/knob';
 import { IssuesStatsComponent } from './issues/issues-stats/issues-stats.component';
 import { BranchesComponent } from './branches/branches.component';
+import { MilestonesTableComponent } from './milestones/milestones-table/milestones-table.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import { BranchesComponent } from './branches/branches.component';
     PullRequestsComponent,
     PullRequestComponent,
     IssuesStatsComponent,
-    BranchesComponent
+    BranchesComponent,
+    MilestonesTableComponent
   ],
   imports: [
     BrowserModule,

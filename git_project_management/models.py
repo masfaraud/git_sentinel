@@ -574,6 +574,12 @@ class Milestone(pony_db.Entity):
     issues = pony.orm.Set(Issue)
     due_on = pony.orm.Optional(int)
 
+    def to_dict(self,full_infos=False):
+        d = pony_db.Entity.to_dict(self)
+        d['repository'] = self.repository.to_dict() 
+        if full_infos:
+            d['issues'] = [i.to_dict() for i in self.issues]
+        return d
     
 class ProjectManager:
     def __init__(self, db_host, db_port, db_user, db_name, db_password):

@@ -57,3 +57,10 @@ export interface PullRequest {
   base_branch: string;
   head_branch: string;
 }
+
+export interface Milestone {
+  id: number;
+  title: string;
+  closed_at: number;
+  due_on: number;
+}

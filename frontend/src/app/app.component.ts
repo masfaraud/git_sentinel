@@ -23,7 +23,7 @@ export class AppComponent {
                 {label: 'Repositories', icon: 'pi pi-fw pi-clone',
                  routerLink: '/repositories'},
                 {label: 'Issues', icon: 'pi pi-ticket', routerLink: '/issues'},
-                {label: 'Branches', icon: 'pi pi-branch', routerLink: '/branches'},
+                {label: 'Branches', icon: 'pi pi-sort-alt', routerLink: '/branches'},
                 {label: 'Pull requests', icon: 'pi pi-reply', routerLink: '/pull-requests'},
                 {label: 'Milestones', icon: 'pi pi-tag', routerLink: '/milestones'},
                 {label: 'Developers', icon: 'pi pi-user', routerLink: '/developers'},
