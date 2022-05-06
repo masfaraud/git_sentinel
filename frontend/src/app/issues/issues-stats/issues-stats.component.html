@@ -1,18 +1,18 @@
 <div *ngIf='issues_stats'>
-  <p>Number open issues: {{issues_stats.number_open_issues}}</p>
+
+  <p-button label="open issues" icon="pi pi-ticket" styleClass="p-button-info" [badge]=issues_stats.number_open_issues badgeClass="p-badge-error"></p-button>
+  <p-button label="uncategorized issues" icon="pi pi-check-square" styleClass="p-button-warning" [badge]=issues_stats.number_issues_uncategorized badgeClass="p-badge-error"></p-button>
+  <p-button label="unprioritized issues" icon="pi pi-sort-amount-down" styleClass="p-button-warning" [badge]=issues_stats.number_issues_unprioritized badgeClass="p-badge-error"></p-button>
+
+  <!-- <p>Number open issues: {{issues_stats.number_open_issues}}</p>
   <p>Number uncategorized issues: {{issues_stats.number_issues_uncategorized}}
-     ({{issues_stats.number_issues_uncategorized/issues_stats.number_open_issues | percent}})</p>
-  <p>Number unprioritized issues: {{issues_stats.number_issues_unprioritized}}
+     ({{issues_stats.number_issues_uncategorized/issues_stats.number_open_issues | percent}})</p> -->
+  <!-- <p>Number unprioritized issues: {{issues_stats.number_issues_unprioritized}}
     ({{issues_stats.number_issues_unprioritized/issues_stats.number_open_issues | percent}})
   </p>
-  <!-- {{stats.number_issues_unprioritized_uncategorized}} -->
   <p>Number uncategorized and unprioritized issues: {{issues_stats.number_issues_unprioritized_uncategorized}}
     ({{issues_stats.number_issues_unprioritized_uncategorized/issues_stats.number_open_issues | percent}})
-  </p>
+  </p> -->
 
-  <!-- <p-knob [(ngModel)]="percent_cat"></p-knob>
-  <p-knob [(ngModel)]="percent_cat" [readonly]='true'></p-knob>
-  <p-knob [ngModel]="percent_prio" [min]="0" [max]="100"></p-knob>
-  <p-knob [ngModel]="percent_cat_prio" [min]="0" [max]="100"></p-knob> -->
 
 </div>

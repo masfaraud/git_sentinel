@@ -291,7 +291,7 @@ class Repository(pony_db.Entity):
         
         r_closed_issues = closed_issues[::-1]
         r_new_issues = new_issues[::-1]
-        r_open_issues = open_issues[::-1]
+        # r_open_issues = open_issues[::-1]
         r_no_milestone_issues = no_milestone_issues[::-1]
         r_max_closing_time = max_closing_time[::-1]
         r_mean_closing_time = mean_closing_time[::-1]
@@ -368,7 +368,7 @@ class GiteaRepository(Repository):
                     issue = Issue(number=req_issue['number'],
                                   repository=self,
                                   title=req_issue['title'],
-                                  body=req_issue['body'],
+                                  body=req_issue['body'][:50000],
                                   api_url=req_issue['url'],
                                   html_url=req_issue['html_url'],
                                   closed=closed,
@@ -378,7 +378,7 @@ class GiteaRepository(Repository):
                                   )
                 else:
                     issue.title = req_issue['title']
-                    issue.body = req_issue['body']
+                    issue.body = req_issue['body'][:50000]
                     issue.closed = closed
                     issue.created_by = creator
     

@@ -17,22 +17,25 @@ import { DeveloperComponent } from './developers/developer/developer.component';
 import { IssuesTableComponent } from './issues/issues-table/issues-table.component';
 import { PullRequestsComponent } from './pull-requests/pull-requests.component';
 import { PullRequestComponent } from './pull-requests/pull-request/pull-request.component';
+import { IssuesStatsComponent } from './issues/issues-stats/issues-stats.component';
+import { BranchesComponent } from './branches/branches.component';
+import { MilestonesTableComponent } from './milestones/milestones-table/milestones-table.component';
 
 import { NgPipesModule } from "ngx-pipes";
 
 import { NuMarkdownModule } from '@ng-util/markdown';
 
 // PrimeNG
-import {ButtonModule} from 'primeng/button';
+import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { TableModule } from 'primeng/table';
-import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { KnobModule } from 'primeng/knob';
-import { IssuesStatsComponent } from './issues/issues-stats/issues-stats.component';
-import { BranchesComponent } from './branches/branches.component';
-import { MilestonesTableComponent } from './milestones/milestones-table/milestones-table.component';
+import {AvatarModule} from 'primeng/avatar';
+import {AvatarGroupModule} from 'primeng/avatargroup';
 
 @NgModule({
   declarations: [
@@ -63,7 +66,10 @@ import { MilestonesTableComponent } from './milestones/milestones-table/mileston
     MegaMenuModule,
     TableModule,
     KnobModule,
+    BadgeModule,
     ProgressSpinnerModule,
+    AvatarModule,
+    AvatarGroupModule,
     NgPipesModule,
     NuMarkdownModule.forRoot(),
   ],
