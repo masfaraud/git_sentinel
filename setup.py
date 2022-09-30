@@ -99,15 +99,15 @@ def get_version():
     return version
 
 
-setup(name='git_project_management',
+setup(name='git_sentinel',
       version=get_version(),
       description="A dashboard merging all your repos and issues on various platform like Github or Gitea",
       long_description=readme(),
       keywords=['git', 'project', 'managment'],
-      url='https://github.com/masfaraud/git_project_management',
+      url='https://github.com/masfaraud/git_sentinel',
       author='Steven Masfaraud',
       author_email='opensource@masfaraud.fr',
-      packages=['git_project_management'],
+      packages=['git_sentinel'],
       install_requires=[
           'pony', 'ciso8601', 'Flask', 'flask-cors',
           'PyMySQL',

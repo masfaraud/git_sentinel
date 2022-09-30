@@ -26,9 +26,9 @@ for env_var_name in ['DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT']:
     else:
         raise RuntimeError('Could not load {} from env vars'.format(env_var_name))
 
-import git_project_management.models as gpm_models
+import git_sentinel.models as gs_models
 
-project_manager = gpm_models.ProjectManager(app.config['DB_HOST'],
+project_manager = gs_models.ProjectManager(app.config['DB_HOST'],
                                             app.config['DB_PORT'],
                                             app.config['DB_USER'],
                                             app.config['DB_NAME'],
@@ -39,8 +39,8 @@ project_manager = gpm_models.ProjectManager(app.config['DB_HOST'],
 # project_manager.update()
 # print('done')
 
-from git_project_management import __version__
-import git_project_management.routes
+from git_sentinel import __version__
+import git_sentinel.routes
 
 
 

@@ -9,7 +9,7 @@ Created on Wed Jan  5 18:40:52 2022
 import pony.orm
 
 from flask import jsonify, request
-from git_project_management.api import app, project_manager
+from git_sentinel.api import app, project_manager
 # from git_project_management.models import Issue
 
 

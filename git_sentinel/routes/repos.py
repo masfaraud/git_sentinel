@@ -9,8 +9,8 @@ Created on Mon Oct 25 09:10:44 2021
 import pony.orm
 
 from flask import jsonify, request
-from git_project_management.api import app
-from git_project_management.models import Repository
+from git_sentinel.api import app
+from git_sentinel.models import Repository
 
 
 @app.route('/repositories')
