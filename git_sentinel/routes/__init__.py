@@ -14,3 +14,4 @@ import git_sentinel.routes.issues
 import git_sentinel.routes.developers
 import git_sentinel.routes.pull_requests
 import git_sentinel.routes.milestones
+import git_sentinel.routes.platforms

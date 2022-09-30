@@ -181,11 +181,11 @@ class Repository(pony_db.Entity):
 
     def plot_milestones(self):
         for milestone in self.milestones.select(lambda m:not m.closed_at).order_by(Milestone.due_on):
-            print(milestone.title)
-            print(milestone.due_on, milestone.closed_at)
+            # print(milestone.title)
+            # print(milestone.due_on, milestone.closed_at)
             closed_issues = milestone.issues.select(lambda i:i.closed).count()
             open_issues = milestone.issues.select(lambda i:not i.closed).count()
-            print('progress ', closed_issues/(closed_issues + open_issues)*100, '%')
+            # print('progress ', closed_issues/(closed_issues + open_issues)*100, '%')
 
     def stalled_branches(self):
         pass
@@ -350,7 +350,7 @@ class GiteaRepository(Repository):
                 created_at = int(ciso8601.parse_datetime(req_issue['created_at']).timestamp())
                 updated_at = int(ciso8601.parse_datetime(req_issue['updated_at']).timestamp())
                 closed = req_issue['state']=='closed'
-                print('state', req_issue['state'], closed)
+                # print('state', req_issue['state'], closed)
                 
                 creator_account = self.platform.get_dev_account(req_issue['user']['email'],
                                                                 req_issue['user']['full_name'],
@@ -364,7 +364,7 @@ class GiteaRepository(Repository):
                         
 
                 if not issue:
-                    print('created an issue')
+                    # print('created an issue')
                     issue = Issue(number=req_issue['number'],
                                   repository=self,
                                   title=req_issue['title'],
@@ -404,6 +404,7 @@ class GiteaRepository(Repository):
                                               title = req_issue['milestone']['title'])
                                               
                     if 'due_on' in req_issue['milestone'] and req_issue['milestone']['due_on']:
+                        print(req_issue['milestone']['due_on'])
                         milestone.due_on = int(ciso8601.parse_datetime(req_issue['milestone']['due_on']).timestamp())
                         
                     if req_issue['milestone']['closed_at']:
