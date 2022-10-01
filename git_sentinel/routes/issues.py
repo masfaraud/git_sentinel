@@ -10,12 +10,12 @@ import pony.orm
 
 from flask import jsonify, request
 from git_sentinel.api import app
-from git_sentinel.models import GitPlatform
+from git_sentinel.models import Issue
 
 
-@app.route('/platforms')
+@app.route('/issues')
 @pony.orm.db_session()
-def list_platforms():
+def list_issues():
     order_by = request.args.get('order_by', type=str, default='id')
     limit = request.args.get('limit', type=int, default=10)
     offset = request.args.get('offset', type=int, default=0)
@@ -27,27 +27,35 @@ def list_platforms():
 
     state = request.args.get('state', type=str, default='open')
     if state == 'all':
-        query = GitPlatform.select()
+        query = Issue.select()
     else:
         closed = state == 'closed'
-        query = GitPlatform.select(lambda i: i.closed == closed)
+        query = Issue.select(lambda i: i.closed == closed)
 
     if asc_order:
-        items = query.order_by(getattr(GitPlatform, order_by))
+        items = query.order_by(getattr(Issue, order_by))
     else:
-        items = query.order_by(pony.orm.desc(getattr(GitPlatform, order_by)))
+        items = query.order_by(pony.orm.desc(getattr(Issue, order_by)))
 
-    return jsonify({'platforms': [i.to_dict() for i in items],
+    return jsonify({'issues': [i.to_dict() for i in items],
                     'limit': limit,
                     'offset': offset})
 
 
-@app.route('/platforms/<int:platform_id>')
+@app.route('/platforms/<int:issue_id>')
 @pony.orm.db_session()
-def platforms_details(platform_id):
+def issue_details(issue_id):
 
-    platform = GitPlatform.get(id=platform_id)
-    if not platform:
-        return 'No such platform', 404
+    issue = Issue.get(id=issue_id)
+    if not issue:
+        return 'No such Issue', 404
 
-    return jsonify(platform.to_dict())
+    return jsonify(issue.to_dict())
+
+@app.route('/issues/stats')
+@pony.orm.db_session()
+def issues_stats():
+    # number_weeks = request.args.get('number_weeks', type=str, default='id')
+    
+    stats = Issue.stats()
+    return jsonify({'stats': stats})
