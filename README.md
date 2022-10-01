@@ -1,6 +1,8 @@
 # Git Sentinel
 Watch multiple git repos from multiple platforms
 
+Website: https://masfaraud.github.io/git_sentinel/
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -34,7 +36,7 @@ See the ![open issues](https://github.com/masfaraud/git_sentinel/issues) for a f
 
 ## Contributing
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "feature".
 Don't forget to give the project a star! Thanks again!
 
 ## License
