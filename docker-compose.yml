@@ -1,0 +1,45 @@
+version: "3.3"
+services:
+
+  db:
+    image: mariadb
+    volumes:
+      - sql-data:/var/lib/mysql
+    networks:
+      - sentinel
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_USER=git_sentinel
+      - MYSQL_DATABASE=git_sentinel
+      - MYSQL_PASSWORD=changethepassword
+    restart: unless-stopped
+
+  backend:
+    image: masfaraud/git_sentinel_backend
+    ports:
+      - "5000:80"
+    depends_on:
+      - db
+    networks:
+      - sentinel
+    environment:
+      - DB_HOST=db
+      - DB_USER=git_sentinel
+      - DB_NAME=git_sentinel
+      - DB_PASSWORD=changethepassword
+    restart: unless-stopped
+
+  frontend:
+    image: masfaraud/git_sentinel_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+ 
+
+networks:
+  sentinel:
+
+volumes:
+  sql-data:

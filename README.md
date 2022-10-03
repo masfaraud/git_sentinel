@@ -16,6 +16,23 @@ This projects aims to merge all data from these repos to offer a dashboard to fo
 
 ## Getting Started
 
+Deploy with docker & docker compose:
+
+```
+mkdir a_folder_for_install
+cd a_folder_for_install
+wget https://raw.githubusercontent.com/masfaraud/git_sentinel/master/docker-compose.yml
+```
+
+Edit the docker-compose.yml file (custom ports & passwords) and run it
+
+```
+docker-compose up -d
+```
+
+
+## Developement install
+
 ```
 python(3) setup.py install
 ```

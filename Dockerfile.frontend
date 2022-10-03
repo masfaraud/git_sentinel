@@ -1,0 +1,26 @@
+### STAGE 1: install ###
+FROM node:14 AS install
+WORKDIR /usr/src/app
+
+RUN npm install -g @angular/cli
+
+COPY frontend/package.json .
+COPY frontend/package-lock.json .
+
+# we should use only needed packages in prod, disabling this until an automated test is set
+# RUN npm install --production
+# RUN npm install @angular-devkit/build-angular@13.1.2
+RUN npm install
+# we are delaying context copy as much as possible since it will cause a cahe miss
+COPY frontend/ .
+
+### STAGE 2 : BUILD #####
+FROM install as build
+
+RUN ng build --source-map=false
+
+### STAGE 3: Run ###
+FROM nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /usr/src/app/dist/frontend/ /usr/share/nginx/html
+

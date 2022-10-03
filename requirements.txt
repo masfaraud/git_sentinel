@@ -1,0 +1,6 @@
+pony
+ciso8601
+Flask
+flask-cors
+PyMySQL
+uwsgi 

@@ -1,0 +1,28 @@
+# syntax = docker/dockerfile:experimental
+
+# Dessia platform backend
+FROM python:3.9
+
+# File Author / Maintainer
+LABEL maintainer="opensource@masfaraud.fr"
+
+WORKDIR /var/www/
+
+# Copy files
+COPY entrypoint.sh uwsgi.ini setup.py README.md ./
+COPY ./git_sentinel ./git_sentinel
+
+RUN touch /var/log/error.log /var/log/access.log
+
+RUN pip install uwsgi # Need to be done before setup
+RUN python setup.py install
+
+EXPOSE 80
+
+# PATHs
+ENV PYTHONPATH="${PYTHONPATH}:/var/www/.local/lib/python3.8/site-packages:/var/www/.local/lib/python3.9/site-packages"
+ENV PATH="${PATH}:/var/www/.local/bin"
+
+
+
+ENTRYPOINT bash entrypoint.sh

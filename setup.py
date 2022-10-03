@@ -5,7 +5,7 @@
 
 from setuptools import setup
 
-from os.path import dirname, isdir, join
+from os.path import dirname, isdir, join, isfile
 import re
 from subprocess import CalledProcessError, check_output
 
@@ -91,10 +91,12 @@ def get_version():
             raise RuntimeError('Unable to get version number from git tags')
 
         return version_from_git_describe(version)
-    else:
+    elif isfile(join(d, 'PKG-INFO')):
         # Extract the version from the PKG-INFO file.
         with open(join(d, 'PKG-INFO')) as f:
             version = version_re.search(f.read()).group(1)
+    else:
+        return 'v0.0.1'
 
     return version
 
@@ -109,9 +111,11 @@ setup(name='git_sentinel',
       author_email='opensource@masfaraud.fr',
       packages=['git_sentinel'],
       install_requires=[
-          'pony', 'ciso8601', 'Flask', 'flask-cors',
+          'pony', 'ciso8601', 'requests',
+          'flask==2.2.2',
+          'flask-cors',
           'PyMySQL',
-          'pony'
+          'uwsgi'
           ],
       python_requires='>=3.7')
 

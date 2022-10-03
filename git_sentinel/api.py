@@ -18,21 +18,23 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # Before inserting config
 cors = CORS(app)
 
+# Default value
+app.config['DB_PORT'] = 3306
 
 # Read from env vars
 for env_var_name in ['DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT']:
     if env_var_name in os.environ and os.environ[env_var_name]:
         app.config[env_var_name] = os.environ[env_var_name]
-    else:
-        raise RuntimeError('Could not load {} from env vars'.format(env_var_name))
+    elif env_var_name not in app.config:
+        raise RuntimeError('Could not load {} from env vars, and not defined by config'.format(env_var_name))
 
 import git_sentinel.models as gs_models
 
 project_manager = gs_models.ProjectManager(app.config['DB_HOST'],
-                                            app.config['DB_PORT'],
-                                            app.config['DB_USER'],
-                                            app.config['DB_NAME'],
-                                            app.config['DB_PASSWORD'])
+                                           app.config['DB_PORT'],
+                                           app.config['DB_USER'],
+                                           app.config['DB_NAME'],
+                                           app.config['DB_PASSWORD'])
 
 # Enhance this with a sync route!
 # print('updating infos')
