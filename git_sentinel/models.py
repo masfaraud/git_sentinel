@@ -32,7 +32,8 @@ class DeveloperAccount(pony_db.Entity):
     def to_dict(self, full_infos=False):
         d = pony_db.Entity.to_dict(self)
         d['email_address'] = self.email_address.to_dict()
-        d['platform'] = self.platform.to_dict()
+        if full_infos:
+            d['platform'] = self.platform.to_dict()
         return d
 
 
@@ -71,7 +72,10 @@ class GitPlatform(pony_db.Entity):
     def to_dict(self):
         # DO Not put token in dict!!!
         return {'id': self.id,
-                'base_url': self.base_url}
+                'base_url': self.base_url,
+                'type': self.classtype,
+                'developers': [da.developer.to_dict() for da in self.developer_accounts]
+                }
 
     @property
     def api_url(self):
@@ -137,7 +141,6 @@ class GitPlatform(pony_db.Entity):
 
 class GithubPlatform(GitPlatform):
     username = pony.orm.Required(str, 100, unique=True)
-    # token = pony.orm.Required(str, 100)
 
 
 class GiteaPlatform(GitPlatform):

@@ -36,6 +36,9 @@ import { TagModule } from 'primeng/tag';
 import { KnobModule } from 'primeng/knob';
 import {AvatarModule} from 'primeng/avatar';
 import {AvatarGroupModule} from 'primeng/avatargroup';
+import { PlatformsComponent } from './platforms/platforms/platforms.component';
+import { PlatformDetailsComponent } from './platforms/platform-details/platform-details.component';
+import { DevelopersTableComponent } from './developers/developers-table/developers-table.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +56,10 @@ import {AvatarGroupModule} from 'primeng/avatargroup';
     PullRequestComponent,
     IssuesStatsComponent,
     BranchesComponent,
-    MilestonesTableComponent
+    MilestonesTableComponent,
+    PlatformsComponent,
+    PlatformDetailsComponent,
+    DevelopersTableComponent
   ],
   imports: [
     BrowserModule,

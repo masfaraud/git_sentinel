@@ -1,7 +1,8 @@
+<img src="assets/logo.png" height="40" class="mr-2">
 <h1>Git Sentinel</h1>
 
+
 <p-megaMenu [model]="items">
-    <!-- <button pButton label="Logout" icon="pi pi-sign-out"></button> -->
     <button *ngIf='!last_update_failed' pButton type="button" label="Update" (click)="update()" [loading]="updating"></button>
     <button *ngIf='last_update_failed' pButton type="button" label="Retry upddate" class="p-button-danger" (click)="update()" [loading]="updating"></button>
 </p-megaMenu>
