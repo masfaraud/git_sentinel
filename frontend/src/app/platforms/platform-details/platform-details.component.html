@@ -1,0 +1,13 @@
+<p-progressSpinner *ngIf='!platform'></p-progressSpinner>
+
+
+<div *ngIf="platform">
+
+    <h2>Platform {{platform.base_url}}</h2>
+
+    <p>type: {{platform.type}}</p> 
+
+    <h2>Developers</h2>
+    <app-developers-table [developers]="platform.developers"></app-developers-table>
+
+</div>

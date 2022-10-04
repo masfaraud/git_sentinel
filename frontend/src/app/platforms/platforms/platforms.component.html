@@ -1,0 +1,8 @@
+<h2>Platforms</h2>
+
+<p-progressSpinner *ngIf='!platforms'></p-progressSpinner>
+
+<p-card *ngFor="let platform of platforms" [routerLink]="['/platforms/'+ platform.id]">
+    {{platform.type}} {{platform.base_url}}
+</p-card>
+

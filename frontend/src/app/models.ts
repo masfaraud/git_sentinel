@@ -64,3 +64,10 @@ export interface Milestone {
   closed_at: number;
   due_on: number;
 }
+
+export interface Platform {
+  id: number;
+  base_url: string;
+  type: string;
+  developers: Developer[];
+}

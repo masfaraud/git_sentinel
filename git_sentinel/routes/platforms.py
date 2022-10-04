@@ -25,12 +25,7 @@ def list_platforms():
         order_by, asc_order = order_by.split('.')
         asc_order = asc_order == 'asc'
 
-    state = request.args.get('state', type=str, default='open')
-    if state == 'all':
-        query = GitPlatform.select()
-    else:
-        closed = state == 'closed'
-        query = GitPlatform.select(lambda i: i.closed == closed)
+    query = GitPlatform.select()
 
     if asc_order:
         items = query.order_by(getattr(GitPlatform, order_by))

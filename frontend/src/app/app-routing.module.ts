@@ -12,6 +12,8 @@ import { DevelopersComponent } from './developers/developers.component'
 import { DeveloperComponent } from './developers/developer/developer.component'
 import { PullRequestsComponent } from './pull-requests/pull-requests.component'
 import { PullRequestComponent } from './pull-requests/pull-request/pull-request.component'
+import { PlatformsComponent } from './platforms/platforms/platforms.component';
+import { PlatformDetailsComponent } from './platforms/platform-details/platform-details.component';
 
 
 const routes: Routes = [
@@ -26,6 +28,8 @@ const routes: Routes = [
   { path: 'pull-requests', component: PullRequestsComponent },
   { path: 'pull-requests/:id', component: PullRequestComponent },
   { path: 'branches', component: BranchesComponent },
+  { path: 'platforms', component: PlatformsComponent },
+  { path: 'platforms/:id', component: PlatformDetailsComponent },
 
 ];
 

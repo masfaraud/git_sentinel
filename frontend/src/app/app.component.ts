@@ -27,6 +27,7 @@ export class AppComponent {
                 {label: 'Pull requests', icon: 'pi pi-reply', routerLink: '/pull-requests'},
                 {label: 'Milestones', icon: 'pi pi-tag', routerLink: '/milestones'},
                 {label: 'Developers', icon: 'pi pi-user', routerLink: '/developers'},
+                {label: 'Platforms', icon: 'pi pi-sitemap', routerLink: '/platforms'},
 
             ]
       }

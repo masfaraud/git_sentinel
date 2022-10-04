@@ -42,7 +42,7 @@ def list_issues():
                     'offset': offset})
 
 
-@app.route('/platforms/<int:issue_id>')
+@app.route('/issues/<int:issue_id>')
 @pony.orm.db_session()
 def issue_details(issue_id):
 
